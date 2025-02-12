@@ -5,7 +5,8 @@ import { AuthError } from 'next-auth';
 import { slugify } from '@/lib/slugify'
 import { prisma } from "@/lib/db";
 import { UpdatePostResult } from '@/types/post'
-
+import { redirect } from 'next/navigation'
+import bcrypt from 'bcryptjs'
 
 export async function createPost(_: any, formData: FormData) {
   const errors: Record<string, string> = {}
@@ -142,9 +143,6 @@ export async function deletePostBySlug(_: any, formData: FormData) {
 
 
 
-
-
-
 export async function authenticate(
     prevState: string | undefined,
     formData: FormData,
@@ -162,4 +160,49 @@ export async function authenticate(
       }
       throw error;
     }
+}
+
+
+export async function register(_: unknown, formData: FormData) {
+  const firstName = formData.get('firstName') as string
+  const lastName = formData.get('lastName') as string
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+  const confirmPassword = formData.get('confirmPassword') as string
+  const redirectTo = (formData.get('redirectTo') as string) || '/dashboard'
+
+  if (!firstName || !lastName || !email || !password || !confirmPassword) {
+    return 'All fields are required.'
   }
+
+  if (password !== confirmPassword) {
+    return 'Passwords do not match.'
+  }
+
+  const existingUser = await prisma.user.findUnique({ where: { email } })
+  if (existingUser) {
+    return 'User with that email already exists.'
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10)
+
+  await prisma.user.create({
+    data: {
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+    },
+  })
+
+  // ✅ Automatically log in the user
+  await signIn('credentials', {
+    email,
+    password,
+    redirect: false, // prevent double redirect
+  })
+
+  // ✅ Now redirect after successful login
+  redirect(redirectTo)
+}
+  

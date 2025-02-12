@@ -18,8 +18,9 @@ async function getUser(email: string) {
   return user;
 }
 
-export const { auth, signIn, signOut } = NextAuth({
+export const { auth, handlers, signIn, signOut } = NextAuth({
   ...authConfig,
+  trustHost: true, // ✅ Add this line
   providers: [
     Credentials({
       async authorize(credentials) {

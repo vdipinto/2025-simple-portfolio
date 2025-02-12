@@ -25,10 +25,6 @@ export const authConfig = {
   },
 
   callbacks: {
-    authorized({ auth }) {
-      return !!auth?.user; // ✅ Only return `true` or `false` (redirects are now in middleware)
-    },
-
     async jwt({ token, user }) {
       if (user) {
         token.user = {
