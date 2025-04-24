@@ -9,6 +9,7 @@ type Post = {
   id: string
   title: string
   slug: string
+  published: boolean
 }
 
 type PostListProps = {
@@ -18,7 +19,7 @@ type PostListProps = {
 
 export default function PostList({ posts, showEditLinks = false }: PostListProps) {
   const [isPending, startTransition] = useTransition()
-  const [localPosts, setLocalPosts] = useState(posts) // 👈 local copy
+  const [localPosts, setLocalPosts] = useState(posts)
 
   const handleDelete = (slug: string) => {
     const confirmed = confirm('Are you sure you want to delete this post?')
@@ -32,7 +33,7 @@ export default function PostList({ posts, showEditLinks = false }: PostListProps
 
       if (result?.success) {
         toast.success('Post deleted successfully!')
-        setLocalPosts((prev) => prev.filter((post) => post.slug !== slug)) // ✅ remove from UI
+        setLocalPosts((prev) => prev.filter((post) => post.slug !== slug))
       } else {
         toast.error(result?.message || 'Failed to delete post.')
       }
@@ -46,9 +47,17 @@ export default function PostList({ posts, showEditLinks = false }: PostListProps
           key={post.id}
           className="flex items-center justify-between px-4 py-2 border rounded hover:bg-gray-50"
         >
-          <Link href={`/blog/${post.slug}`} className="text-blue-600 hover:underline">
-            {post.title}
-          </Link>
+          <div>
+            <Link href={`/blog/${post.slug}`} className="text-blue-600 hover:underline">
+              {post.title}
+            </Link>
+
+            {showEditLinks && !post.published && (
+              <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
+                Draft
+              </span>
+            )}
+          </div>
 
           {showEditLinks && (
             <div className="flex items-center gap-4">

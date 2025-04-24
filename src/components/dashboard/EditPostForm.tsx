@@ -1,53 +1,50 @@
 'use client'
 
-import { useRef, useState, useEffect, startTransition } from 'react'
+import { useRef, useState, useTransition, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { TiptapEditor } from '@/components/ui/TiptapEditor'
-import { useActionState } from 'react'
 import { slugify } from '@/lib/slugify'
 import { updatePost } from '@/actions/actions'
 import { toast } from 'sonner'
-import { UpdatePostResult } from '@/types/post'
+import clsx from 'clsx'
 
 export default function EditPostForm({ post }: { post: any }) {
+  const router = useRouter()
   const [title, setTitle] = useState(post.title)
   const [slug, setSlug] = useState(post.slug)
   const [category, setCategory] = useState(post.category ?? '')
   const [published, setPublished] = useState(post.published)
-  const [state, formAction] = useActionState<UpdatePostResult | null, FormData>(
-    updatePost,
-    null
-  )
-  
+  const [formState, setFormState] = useState<any>(null)
+  const [isPending, startTransition] = useTransition()
 
   const editorRef = useRef<{ getContent: () => any }>(null)
 
-  const isNewPost = false
-
   useEffect(() => {
-    if (isNewPost) {
-      setSlug(slugify(title))
-    }
-  }, [title, isNewPost])
+    setSlug(slugify(title))
+  }, [title])
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    const formData = new FormData(e.currentTarget)
+    const content = editorRef.current?.getContent()
+    formData.set('content', JSON.stringify(content))
+
+    startTransition(async () => {
+      const result = await updatePost(undefined, formData)
+
+      if (result.success) {
+        toast.success(result.published ? 'Post published!' : 'Post saved as draft.')
+        router.push('/dashboard/all-posts')
+      } else {
+        toast.error(result.errors?.general || 'Failed to update post')
+        setFormState(result)
+      }
+    })
+  }
 
   return (
-    <form
-    action={async (formData: FormData) => {
-      const content = editorRef.current?.getContent()
-      formData.append('content', JSON.stringify(content))
-  
-      await formAction(formData)
-  
-      // ✅ Now use `state`, not the result of formAction
-      startTransition(() => {
-        if (state?.success) {
-          toast.success(state.published ? 'Post published successfully!' : 'Post saved as draft.')
-        } else if (state?.message) {
-          toast.error(state.message)
-        }
-      })
-    }}
-    className="space-y-4"
-  >
+    <form onSubmit={handleSubmit} className="space-y-4">
       <input type="hidden" name="slug" value={post.slug} />
 
       <div>
@@ -58,6 +55,9 @@ export default function EditPostForm({ post }: { post: any }) {
           onChange={(e) => setTitle(e.target.value)}
           className="w-full border p-2 rounded"
         />
+        {formState?.errors?.title && (
+          <p className="text-red-600 text-sm mt-1">{formState.errors.title}</p>
+        )}
       </div>
 
       <div>
@@ -68,6 +68,9 @@ export default function EditPostForm({ post }: { post: any }) {
           readOnly
           className="w-full border p-2 rounded bg-gray-100 text-gray-600"
         />
+        {formState?.errors?.slug && (
+          <p className="text-red-600 text-sm mt-1">{formState.errors.slug}</p>
+        )}
       </div>
 
       <div>
@@ -78,6 +81,9 @@ export default function EditPostForm({ post }: { post: any }) {
           onChange={(e) => setCategory(e.target.value)}
           className="w-full border p-2 rounded"
         />
+        {formState?.errors?.category && (
+          <p className="text-red-600 text-sm mt-1">{formState.errors.category}</p>
+        )}
       </div>
 
       <label className="flex items-center gap-2 text-sm">
@@ -90,16 +96,22 @@ export default function EditPostForm({ post }: { post: any }) {
         Published
       </label>
 
-      
-      <TiptapEditor ref={editorRef} content={post.content ?? {}} />
+      <input type="hidden" name="content" />
 
-      <button type="submit" className="bg-black text-white px-4 py-2 rounded">
-        Update Post
+      <div className="border rounded p-2">
+        <TiptapEditor ref={editorRef} content={post.content ?? {}} />
+        {formState?.errors?.content && (
+          <p className="text-red-600 text-sm mt-2">{formState.errors.content}</p>
+        )}
+      </div>
+
+      <button
+        type="submit"
+        className="bg-black text-white px-4 py-2 rounded disabled:opacity-50"
+        disabled={isPending}
+      >
+        {isPending ? 'Saving...' : 'Update Post'}
       </button>
-
-      {state?.errors?.general && (
-        <p className="text-red-600 text-sm mt-2">{state.errors.general}</p>
-      )}
     </form>
   )
 }

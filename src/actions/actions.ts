@@ -4,120 +4,173 @@ import { signIn } from "@/auth"; // ✅ Now works with `@/`
 import { AuthError } from 'next-auth';
 import { slugify } from '@/lib/slugify'
 import { prisma } from "@/lib/db";
-import { UpdatePostResult } from '@/types/post'
 import { redirect } from 'next/navigation'
 import bcrypt from 'bcryptjs'
+import { z } from 'zod';
 
-export async function createPost(_: any, formData: FormData) {
-  const errors: Record<string, string> = {}
 
-  const title = formData.get('title') as string
-  const slug = (formData.get('slug') as string) || slugify(title)
-  const category = formData.get('category') as string
-  const published = formData.get('published') === 'on'
-  const contentRaw = formData.get('content')
 
-  // 🧠 Validation
-  if (!title || title.trim() === '') {
-    errors.title = 'Title is required.'
-  }
+const CreatePostSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  slug: z.string().min(1, 'Slug is required'),
+  category: z.string().min(1, 'Category is required'),
+  published: z.boolean(),
+  content: z.object({
+    type: z.literal('doc'),
+    content: z.array(z.any()),
+  }).refine((val) => val.content.length > 0, {
+    message: 'Post content cannot be empty',
+  }),
+})
 
-  if (!contentRaw || contentRaw === 'null' || contentRaw === '{}' || contentRaw === '') {
-    errors.content = 'Post content cannot be empty.'
-  }
+type FormState =
+  | { success: true; slug: string }
+  | {
+      success: false
+      errors: Partial<{
+        title: string
+        slug: string
+        category: string
+        content: string
+        general: string
+      }>
+    }
 
-  if (Object.keys(errors).length > 0) {
-    return { success: false, errors }
-  }
+const UpdatePostSchema = z.object({
+  slug: z.string().min(1, 'Missing post identifier'),
+  title: z.string().min(1, 'Title is required'),
+  category: z.string().min(1, 'Category is required'),
+  published: z.boolean(),
+  content: z.object({
+    type: z.literal('doc'),
+    content: z.array(z.any()),
+  }).refine((val) => val.content.length > 0, {
+    message: 'Post content cannot be empty',
+  }),
+})
+    
+type UpdatePostResult =
+  | { success: true; published: boolean }
+  | {
+      success: false
+      message?: string
+      errors?: Partial<{
+        title: string
+        slug: string
+        category: string
+        content: string
+        general: string
+      }>
+    }
 
+export async function createPost(prevState: any, formData: FormData): Promise<FormState> {
   try {
-    const content = JSON.parse(contentRaw as string)
+    const raw = {
+      title: formData.get('title')?.toString() || '',
+      slug:
+        formData.get('slug')?.toString() ||
+        slugify(formData.get('title')?.toString() || ''),
+      category: formData.get('category')?.toString() || '',
+      published: formData.get('published') === 'on',
+      content: JSON.parse(formData.get('content')?.toString() || '{}'),
+    }
 
-    const post = await prisma.post.create({
-      data: {
-        title,
-        slug,
-        category,
-        published,
-        content,
-      },
+    // Debug: log raw values
+    console.log('🧾 Raw parsed data:', raw)
+
+    // Validate input with Zod
+    const data = CreatePostSchema.parse(raw)
+
+    // Optional: check if slug already exists
+    const existing = await prisma.post.findUnique({
+      where: { slug: data.slug },
     })
 
-    return { success: true, slug: post.slug }
-  } catch (error) {
-    console.error('Create post error:', error)
-    return {
-      success: false,
-      errors: { general: 'Something went wrong. Please try again.' },
-    }
-  }
-}
-
-
-export async function updatePost(_: any, formData: FormData): Promise<UpdatePostResult> {
-  const formValues = Object.fromEntries(formData.entries())
-  const errors: Record<string, string> = {}
-
-  const title = formValues.title as string
-  const slug = formValues.slug as string
-  const category = formValues.category as string
-  const published = formValues.published === 'on'
-  const contentRaw = formValues.content as string
-
-  // ✅ Validation
-  if (!slug || slug.trim() === '') {
-    errors.slug = 'Slug is required.'
-  }
-
-  if (!title || title.trim() === '') {
-    errors.title = 'Title is required.'
-  }
-
-  if (!contentRaw || contentRaw === 'null' || contentRaw === '{}' || contentRaw === '') {
-    errors.content = 'Post content cannot be empty.'
-  }
-
-  if (Object.keys(errors).length > 0) {
-    return { success: false, errors }
-  }
-
-  try {
-    const content = JSON.parse(contentRaw)
-
-    await prisma.post.update({
-      where: { slug },
-      data: {
-        title,
-        slug,
-        category,
-        published,
-        content,
-      },
-    })
-
-    return {
-      success: true,
-      slug,
-      published, // <-- include this
-      message: 'Post updated successfully!',
-    }
-  } catch (err: any) {
-    console.error('Update post error:', err)
-
-    if (err.code === 'P2002' && err.meta?.target?.includes('slug')) {
+    if (existing) {
       return {
         success: false,
         errors: {
-          slug: 'This slug is already in use.',
+          slug: 'A post with this slug already exists',
         },
       }
     }
 
+    const post = await prisma.post.create({
+      data: {
+        title: data.title,
+        slug: data.slug,
+        category: data.category,
+        published: data.published,
+        content: data.content,
+      },
+    })
+
+    return { success: true, slug: post.slug }
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      const errors = err.flatten().fieldErrors
+      return {
+        success: false,
+        errors: {
+          title: errors.title?.[0],
+          slug: errors.slug?.[0],
+          category: errors.category?.[0],
+          content: errors.content?.[0],
+        },
+      }
+    }
+
+    console.error('❌ Create post error:', err)
     return {
       success: false,
       errors: {
-        general: 'Failed to update post. Please try again.',
+        general: 'Something went wrong. Please try again.',
       },
+    }
+  }
+}
+
+export async function updatePost(_: any, formData: FormData): Promise<UpdatePostResult> {
+  try {
+    const raw = {
+      slug: formData.get('slug')?.toString() || '',
+      title: formData.get('title')?.toString() || '',
+      category: formData.get('category')?.toString() || '',
+      published: (formData.get('published') === 'on') as boolean,
+      content: JSON.parse(formData.get('content')?.toString() || '{}'),
+    }
+
+    const data = UpdatePostSchema.parse(raw)
+
+    const post = await prisma.post.update({
+      where: { slug: data.slug },
+      data: {
+        title: data.title,
+        category: data.category,
+        published: data.published,
+        content: data.content,
+      },
+    })
+
+    return { success: true, published: post.published ?? false }
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      const errors = err.flatten().fieldErrors
+      return {
+        success: false,
+        errors: {
+          title: errors.title?.[0],
+          slug: errors.slug?.[0],
+          category: errors.category?.[0],
+          content: errors.content?.[0],
+        },
+      }
+    }
+
+    console.error('❌ Update post error:', err)
+    return {
+      success: false,
+      message: 'Something went wrong. Please try again.',
     }
   }
 }
@@ -205,4 +258,22 @@ export async function register(_: unknown, formData: FormData) {
   // ✅ Now redirect after successful login
   redirect(redirectTo)
 }
+
+export async function getAllImages() {
+  return await prisma.image.findMany({
+    orderBy: { uploadedAt: 'desc' },
+  })
+}
+
+export async function deleteImage(id: string) {
+  try {
+    await prisma.image.delete({
+      where: { id },
+    })
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: 'Failed to delete image' }
+  }
+}
+
   
