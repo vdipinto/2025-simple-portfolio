@@ -1,37 +1,30 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import Nav from "@/components/ui/Nav";
-import MobileNav from "@/components/ui/mobile-nav";
-import { ModeToggle } from "./toggle-mode";
-import UserMenu from "@/components/ui/UserMenu";
 
 
 const Header = () => {
   return (
-    <header className="py-8 xl:py-12 px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20">
-      <div className="container mx-auto flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/">
-          <h1 className="text-4xl font-semibold">
-            Vito<span className="text-primary">.</span>
-          </h1>
-        </Link>
+    <header>
+      
+      {/* Lines Section (First element) */}
+      <section className="w-full mx-auto px-4">
+        <div className="border-x border-zinc-200 dark:border-zinc-800 relative h-4"></div>
+      </section>
 
-        {/* Desktop Nav */}
-        <div className="hidden xl:flex items-center gap-9">
+      {/* Horizontal Line */}
+      <hr className="border-zinc-200 dark:border-zinc-800" />
+
+      {/* Header Content wrapped inside a section */}
+      <section className="w-full mx-auto px-4">
+        <div className="mx-auto flex items-center justify-between border-x border-zinc-200 dark:border-zinc-800 relative h-16">
           <Nav />
-          <Link href="/contact">
-            <Button>Hire me</Button>
-          </Link>
-          <ModeToggle />
-          <UserMenu />
         </div>
+      </section>
+      {/* Horizontal Line */}
+      <hr className="border-zinc-200 dark:border-zinc-800" />
+      <section className="w-full mx-auto px-4">
+        <div className="border-x border-zinc-200 dark:border-zinc-800 relative"></div>
+      </section>
 
-        {/* Mobile Nav */}
-        <div className="xl:hidden">
-          <MobileNav />
-        </div>
-      </div>
     </header>
   );
 };

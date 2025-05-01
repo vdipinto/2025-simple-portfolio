@@ -57,7 +57,11 @@ const config: Config = withUt({
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
-      },
+      }
+    },
+    fontFamily: {
+      sans: ['var(--font-public-sans)', 'sans-serif'], // body
+      heading: ['var(--font-space-grotesk)', 'sans-serif'], // headings
     },
   },
   plugins: [

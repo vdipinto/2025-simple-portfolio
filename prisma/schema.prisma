@@ -13,44 +13,63 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model Post {
-  id              String       @id @default(cuid())
+  id              String      @id @default(cuid())
   title           String
-  slug            String       @unique @default("default-slug")
-  content         Json         // Tiptap JSON
-  category        String?
-  published       Boolean      @default(false)
-  featuredImage   Image?       @relation("FeaturedImage", fields: [featuredImageId], references: [id])
-  featuredImageId String?      // Optional reference to the Image model
-  images          PostImage[]  // All images used in the post (body, gallery, etc.)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  slug            String      @unique
+  content         Json
+  category        Category?   @relation(fields: [categoryId], references: [id])
+  categoryId      String?
+  tags            Tag[]       @relation("PostTags")
+  published       Boolean     @default(false)
+  publishedAt     DateTime?
+  readingTime     Int?
+  featuredImage   Image?      @relation("FeaturedImage", fields: [featuredImageId], references: [id])
+  featuredImageId String?
+  images          PostImage[]
+  seoTitle        String?
+  seoDescription  String?
+  seoImage        Image?      @relation("SeoImage", fields: [seoImageId], references: [id])
+  seoImageId      String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Category {
+  id    String @id @default(cuid())
+  name  String @unique
+  posts Post[]
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  name  String @unique
+  posts Post[] @relation("PostTags")
 }
 
 model Image {
-  id        String       @id @default(cuid())
-  url       String       @unique
-  alt       String?
-  width     Int?
-  height    Int?
-  mimeType  String?
-  uploadedAt DateTime    @default(now())
+  id         String   @id @default(cuid())
+  url        String   @unique
+  alt        String?
+  width      Int?
+  height     Int?
+  mimeType   String?
+  uploadedAt DateTime @default(now())
 
-  featuredInPosts Post[]      @relation("FeaturedImage")
-  usedInPosts     PostImage[] // via the join table
+  featuredInPosts  Post[]      @relation("FeaturedImage")
+  seoImageForPosts Post[]      @relation("SeoImage") // 👈 added this line
+  usedInPosts      PostImage[] // many-to-many join table
 }
 
 model PostImage {
-  id       String   @id @default(cuid())
-  post     Post     @relation(fields: [postId], references: [id])
+  id       String  @id @default(cuid())
+  post     Post    @relation(fields: [postId], references: [id])
   postId   String
-  image    Image    @relation(fields: [imageId], references: [id])
+  image    Image   @relation(fields: [imageId], references: [id])
   imageId  String
   caption  String?
-  position Int?     // optional: for ordering in galleries
+  position Int? // optional: for ordering in galleries
 }
-
 
 model User {
   id        String @id @default(cuid())

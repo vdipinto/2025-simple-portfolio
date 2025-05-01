@@ -18,7 +18,7 @@ export default function MobileNav() {
 
   return (
     <Sheet>
-      <SheetTrigger className="flex items-center justify-center">
+      <SheetTrigger className="flex items-center justify-center h-full aspect-square border-l border-zinc-200 dark:border-zinc-800">
         <HiBars3 className="text-[32px]" />
       </SheetTrigger>
 

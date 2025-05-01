@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Public_Sans } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/ui/Header";
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "next-auth/react";
+import ClientBreadcrumbs from "@/components/navigation/ClientBreadcrumbs";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -35,15 +36,19 @@ export default function RootLayout({
       >
         <SessionProvider>
           <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <Header />
-              {children}
-            </ThemeProvider>
-          </SessionProvider>
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Header />
+
+             {/* 2️⃣ Breadcrumbs immediately after the header */}
+             <ClientBreadcrumbs />
+
+            {children}
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );

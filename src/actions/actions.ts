@@ -15,6 +15,7 @@ const CreatePostSchema = z.object({
   slug: z.string().min(1, 'Slug is required'),
   category: z.string().min(1, 'Category is required'),
   published: z.boolean(),
+  featuredImageId: z.string().optional().nullable(), // ✅ new line
   content: z.object({
     type: z.literal('doc'),
     content: z.array(z.any()),
@@ -32,6 +33,7 @@ type FormState =
         slug: string
         category: string
         content: string
+        featuredImageId: string // ✅ optional error support
         general: string
       }>
     }
@@ -47,6 +49,7 @@ const UpdatePostSchema = z.object({
   }).refine((val) => val.content.length > 0, {
     message: 'Post content cannot be empty',
   }),
+  featuredImageId: z.string().nullable().optional(),
 })
     
 type UpdatePostResult =
@@ -73,6 +76,7 @@ export async function createPost(prevState: any, formData: FormData): Promise<Fo
       category: formData.get('category')?.toString() || '',
       published: formData.get('published') === 'on',
       content: JSON.parse(formData.get('content')?.toString() || '{}'),
+      featuredImageId: formData.get('featuredImageId')?.toString() || null, // ✅ add this
     }
 
     // Debug: log raw values
@@ -102,6 +106,7 @@ export async function createPost(prevState: any, formData: FormData): Promise<Fo
         category: data.category,
         published: data.published,
         content: data.content,
+        featuredImageId: formData.get('featuredImageId')?.toString() || null,
       },
     })
 
@@ -138,21 +143,27 @@ export async function updatePost(_: any, formData: FormData): Promise<UpdatePost
       category: formData.get('category')?.toString() || '',
       published: (formData.get('published') === 'on') as boolean,
       content: JSON.parse(formData.get('content')?.toString() || '{}'),
+      featuredImageId: formData.get('featuredImageId')?.toString() || null, // ✅ add this
     }
 
-    const data = UpdatePostSchema.parse(raw)
+    console.log('🧾 Update raw data:', raw)
 
-    const post = await prisma.post.update({
+    const data = UpdatePostSchema.extend({
+      featuredImageId: z.string().nullable().optional(),
+    }).parse(raw)
+
+    const updated = await prisma.post.update({
       where: { slug: data.slug },
       data: {
         title: data.title,
         category: data.category,
         published: data.published,
         content: data.content,
+        featuredImageId: data.featuredImageId || null, // ✅ replace or remove image
       },
     })
 
-    return { success: true, published: post.published ?? false }
+    return { success: true, published: updated.published ?? false }
   } catch (err) {
     if (err instanceof z.ZodError) {
       const errors = err.flatten().fieldErrors
@@ -163,6 +174,7 @@ export async function updatePost(_: any, formData: FormData): Promise<UpdatePost
           slug: errors.slug?.[0],
           category: errors.category?.[0],
           content: errors.content?.[0],
+          featuredImageId: errors.featuredImageId?.[0],
         },
       }
     }
@@ -174,6 +186,7 @@ export async function updatePost(_: any, formData: FormData): Promise<UpdatePost
     }
   }
 }
+
 
 
 

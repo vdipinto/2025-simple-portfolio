@@ -7,6 +7,7 @@ import { createPost } from '@/actions/actions'
 import { slugify } from '@/lib/slugify'
 import clsx from 'clsx'
 import { toast } from 'sonner'
+import MediaLibraryClient from '@/components/dashboard/MediaLibraryClient'
 
 export default function CreatePostPage() {
   const router = useRouter()
@@ -15,6 +16,10 @@ export default function CreatePostPage() {
   const [formState, setFormState] = useState<any>(null)
   const [isPending, startTransition] = useTransition()
   const editorRef = useRef<{ getContent: () => any }>(null)
+
+  // 🖼️ Featured image
+  const [featuredImage, setFeaturedImage] = useState<{ id: string, url: string } | null>(null)
+  const [mediaOpen, setMediaOpen] = useState(false)
 
   useEffect(() => {
     setSlug(slugify(title))
@@ -27,18 +32,18 @@ export default function CreatePostPage() {
     const content = editorRef.current?.getContent()
     formData.set('content', JSON.stringify(content))
 
+    if (featuredImage) {
+      formData.set('featuredImageId', featuredImage.id)
+    }
+
     startTransition(async () => {
       const result = await createPost(undefined, formData)
 
       if (result.success) {
         toast.success('Post created successfully!')
-        router.push('/dashboard/all-posts') // ✅ Redirect after success
+        router.push('/dashboard/all-posts')
       } else {
-        if (result.errors?.general) {
-          toast.error(result.errors.general)
-        } else {
-          toast.error('Failed to create post. Please check the form for errors.')
-        }
+        toast.error(result.errors?.general || 'Failed to create post.')
         setFormState(result)
       }
     })
@@ -58,9 +63,7 @@ export default function CreatePostPage() {
             className="w-full border p-2 rounded"
             placeholder="Title"
           />
-          {formState?.errors?.title && (
-            <p className="text-red-600 text-sm mt-1">{formState.errors.title}</p>
-          )}
+          {formState?.errors?.title && <p className="text-red-600 text-sm mt-1">{formState.errors.title}</p>}
         </div>
 
         <div>
@@ -69,21 +72,17 @@ export default function CreatePostPage() {
             value={slug}
             readOnly
             className={clsx(
-              'w-full border p-2 rounded bg-gray-100 text-gray-600',
+              'w-full border p-2 rounded',
               formState?.errors?.slug && 'border-red-500'
             )}
             placeholder="Slug will be generated automatically"
           />
-          {formState?.errors?.slug && (
-            <p className="text-red-600 text-sm mt-1">{formState.errors.slug}</p>
-          )}
+          {formState?.errors?.slug && <p className="text-red-600 text-sm mt-1">{formState.errors.slug}</p>}
         </div>
 
         <div>
           <input name="category" className="w-full border p-2 rounded" placeholder="Category" />
-          {formState?.errors?.category && (
-            <p className="text-red-600 text-sm mt-1">{formState.errors.category}</p>
-          )}
+          {formState?.errors?.category && <p className="text-red-600 text-sm mt-1">{formState.errors.category}</p>}
         </div>
 
         <label className="flex items-center gap-2 text-sm">
@@ -91,7 +90,28 @@ export default function CreatePostPage() {
           Publish immediately
         </label>
 
-        <input type="hidden" name="content" />
+        {/* 🔥 Featured Image Picker */}
+        <div className="border p-3 rounded">
+          <div className="mb-2 font-medium text-sm">Featured Image</div>
+
+          {featuredImage ? (
+            <div className="mb-2">
+              <img src={featuredImage.url} alt="Featured" className="w-full h-40 object-cover rounded" />
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 mb-2">No image selected.</p>
+          )}
+
+          <button
+            type="button"
+            className="text-sm underline text-blue-600"
+            onClick={() => setMediaOpen(true)}
+          >
+            Select Featured Image
+          </button>
+
+          <input type="hidden" name="featuredImageId" value={featuredImage?.id || ''} />
+        </div>
 
         <div className="border rounded p-2">
           <TiptapEditor ref={editorRef} content={{ type: 'doc', content: [] }} />
@@ -108,6 +128,17 @@ export default function CreatePostPage() {
           {isPending ? 'Publishing...' : 'Publish Post'}
         </button>
       </form>
+
+      {/* Media Picker Modal */}
+      <MediaLibraryClient
+        open={mediaOpen}
+        onClose={() => setMediaOpen(false)}
+        onSelect={(image) => {
+          setFeaturedImage(image)
+          setMediaOpen(false)
+        }}
+        images={[]} // You should fetch them if needed
+      />
     </div>
   )
 }

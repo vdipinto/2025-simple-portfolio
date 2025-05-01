@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,10 +17,10 @@ export default function UserMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="p-2 rounded-full hover:bg-accent transition-colors"
+          className="h-full aspect-square flex items-center justify-center bg-transparent transition-colors hover:bg-accent"
           aria-label="User Menu"
         >
-          <FiUser className="text-xl" />
+          <FiUser className="w-6 h-6" />
         </button>
       </DropdownMenuTrigger>
 
