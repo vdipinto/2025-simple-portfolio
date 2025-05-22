@@ -14,10 +14,9 @@ export default async function EditPostPage({ params }: Props) {
   const post = await prisma.post.findUnique({
     where: { slug },
     include: {
+      category: true, // ✅ you need this
       featuredImage: true,
       seoImage: true,
-      category: true,
-      tags: true,
     },
   })
   if (!post) return notFound()

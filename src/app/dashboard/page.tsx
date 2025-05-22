@@ -1,9 +1,10 @@
-import { auth } from "@/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/auth";
 
 export default async function Dashboard() {
-  const session = await auth(); // ✅ Fetch session in Server Component
+  const session = await getServerSession(authOptions);
 
-  console.log("Session Debug:", session); // ✅ Log session for debugging
+  console.log("Session Debug:", session);
 
   if (!session) {
     return <p>You are not logged in.</p>; // Or redirect to /login

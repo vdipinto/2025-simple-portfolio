@@ -1,8 +1,8 @@
 
 import { prisma } from "@/lib/db"
-import { calculateReadingTime } from "@/lib/calculate-reading-time"
 import Link from "next/link"
-import type { TiptapContent } from "@/lib/types" // 👈 make sure you import this!
+import { format } from 'date-fns'
+
 
 export default async function LatestBlogPosts() {
     const posts = await prisma.post.findMany({
@@ -30,28 +30,41 @@ export default async function LatestBlogPosts() {
             {/* Cards Section */}
             <section className="w-full mx-auto px-4 border-b border-x border-zinc-200 dark:border-zinc-800">
                 <div className="flex flex-wrap">
-                    {posts.map((post, index) => (
-                        <div
-                            key={post.id}
-                            className={`bg-card text-card-foreground shadow hover:shadow-lg
-        h-full overflow-hidden transition rounded-none flex flex-col p-6
-        w-full sm:w-1/2 md:w-1/3
-        border-x border-zinc-200 dark:border-zinc-800
-        ${index !== 0 ? 'border-t-0' : ''}
-        ${index !== posts.length - 1 ? 'border-b' : ''}`}
-                        >
-                            <h3 className="font-bold text-lg mb-2">{post.title}</h3>
-                            <p className="text-muted-foreground text-sm mb-4">
-                                {calculateReadingTime(post.content as TiptapContent)} min read
-                            </p>
-                            <Link href={`/blog/${post.slug}`} className="text-primary underline text-sm mt-auto">
-                                Read more →
-                            </Link>
-                        </div>
-                    ))}
+                {posts.map((post, index) => (
+  <div
+    key={post.id}
+    className={`
+      w-full sm:w-1/2 md:w-1/3
+      border-x border-zinc-200 dark:border-zinc-800
+      ${index !== 0 ? 'border-t-0' : ''}
+      ${index !== posts.length - 1 ? 'border-b' : ''}
+    `}
+  >
+    <Link
+      href={`/blog/${post.slug}`}
+      className="group flex flex-col overflow-hidden flex-grow p-6 gap-4 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors duration-200 h-full"
+    >
+      <h3 className="text-[24px] leading-[34px] font-medium group-hover:underline">
+        {post.title}
+      </h3>
+
+      {(post.readingTime || post.publishedAt) && (
+        <div className="flex items-center gap-x-2 tracking-wider uppercase text-zinc-500 text-[12px] leading-[18px]">
+          {post.readingTime && <span>{post.readingTime} min read</span>}
+          {post.readingTime && post.publishedAt && <span>•</span>}
+          {post.publishedAt && (
+            <time dateTime={new Date(post.publishedAt).toISOString().split('T')[0]}>
+              {format(new Date(post.publishedAt), 'MMMM d, yyyy')}
+            </time>
+          )}
+        </div>
+      )}
+    </Link>
+  </div>
+))}
+
                 </div>
             </section>
-
         </>
     );
 }

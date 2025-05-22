@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { UploadButton } from '@/utils/uploadthing'
 import { useEffect, useState } from 'react'
+import NextImage from 'next/image'
 
 type Image = {
   id: string
@@ -58,7 +59,7 @@ export default function MediaLibraryClient({
         </DialogHeader>
 
         <div className="mb-4">
-          <UploadButton
+          {/* <UploadButton
             endpoint="imageUploader"
             onClientUploadComplete={() => {
               refreshImages()
@@ -66,7 +67,21 @@ export default function MediaLibraryClient({
             onUploadError={(error) => {
               console.error('Upload error:', error)
             }}
+          /> */}
+          <UploadButton
+            endpoint="imageUploader"
+            onClientUploadComplete={(res) => {
+              console.log("Upload complete:", res);
+            }}
+            onUploadError={(error: Error) => {
+              if (error.message.includes("FileSizeMismatch")) {
+                alert("File too large! Please upload an image under 4MB.");
+              } else {
+                alert(`Upload failed: ${error.message}`);
+              }
+            }}
           />
+
         </div>
 
         <ScrollArea className="h-[60vh]">
@@ -80,9 +95,11 @@ export default function MediaLibraryClient({
                   onClose()
                 }}
               >
-                <img
+                <NextImage
                   src={image.url}
                   alt={image.alt || ''}
+                  width={400} // estimate based on your layout
+                  height={128}
                   className="object-cover w-full h-32"
                 />
               </button>

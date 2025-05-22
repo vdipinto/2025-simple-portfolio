@@ -7,25 +7,33 @@ import { updatePost } from '@/actions/actions'
 import { toast } from 'sonner'
 import MediaLibraryClient from '@/components/dashboard/MediaLibraryClient'
 import clsx from 'clsx'
-import { Post, Image } from '@prisma/client' // ✅ Prisma types
+import { Post, Image, Category } from '@prisma/client'
+import type { JSONContent } from '@tiptap/react'
+import NextImage from 'next/image'
+import type { FormState } from '@/actions/actions';
+import { hasErrors } from '@/utils/formHelpers'
+
 
 type Props = {
   post: Post & {
+    category?: Category | null
     featuredImage?: Image | null
+    seoImage?: Image | null
   }
 }
 
 export default function EditPostForm({ post }: Props) {
   const router = useRouter()
-  const editorRef = useRef<{ getContent: () => any }>(null)
-
+  const editorRef = useRef<{ getContent: () => JSONContent }>(null)
   const [title, setTitle] = useState(post.title)
-  const [slug, setSlug] = useState(post.slug)
-  const [category, setCategory] = useState(post.category)
+  const [slug] = useState(post.slug)
+  const [category, setCategory] = useState(post.category?.name || '')
   const [published, setPublished] = useState(post.published)
   const [featuredImage, setFeaturedImage] = useState(post.featuredImage || null)
+  const [seoTitle, setSeoTitle] = useState(post.seoTitle || '')
+  const [seoDescription, setSeoDescription] = useState(post.seoDescription || '')
   const [mediaOpen, setMediaOpen] = useState(false)
-  const [formState, setFormState] = useState<any>(null)
+  const [formState, setFormState] = useState<FormState | null>(null)
   const [isPending, startTransition] = useTransition()
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -37,8 +45,10 @@ export default function EditPostForm({ post }: Props) {
 
     if (featuredImage) {
       formData.set('featuredImageId', featuredImage.id)
+      formData.set('seoImageId', featuredImage.id) // 👈 use same image for SEO
     } else {
       formData.set('featuredImageId', '')
+      formData.set('seoImageId', '')
     }
 
     startTransition(async () => {
@@ -59,44 +69,62 @@ export default function EditPostForm({ post }: Props) {
       <h1 className="text-2xl font-bold">Edit Post</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Title */}
         <div>
+          <label htmlFor="title" className="block text-sm font-medium mb-1">
+            Title
+          </label>
           <input
+            id="title"
             name="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
             className="w-full border p-2 rounded"
-            placeholder="Title"
+            placeholder="Post title"
           />
-          {formState?.errors?.title && (
+          {/* Title */}
+          {hasErrors(formState) && formState.errors.title && (
             <p className="text-red-600 text-sm mt-1">{formState.errors.title}</p>
           )}
         </div>
 
+        {/* Slug */}
         <div>
+          <label htmlFor="slug" className="block text-sm font-medium mb-1">
+            Slug
+          </label>
           <input
+            id="slug"
             name="slug"
             value={slug}
             readOnly
             className={clsx(
               'w-full border p-2 rounded',
-              formState?.errors?.slug && 'border-red-500'
+              hasErrors(formState) && formState.errors.slug && 'border-red-500'
             )}
           />
-          {formState?.errors?.slug && (
+          {/* Slug */}
+          {hasErrors(formState) && formState.errors.slug && (
             <p className="text-red-600 text-sm mt-1">{formState.errors.slug}</p>
           )}
         </div>
 
+        {/* Category */}
         <div>
+          <label htmlFor="category" className="block text-sm font-medium mb-1">
+            Category
+          </label>
           <input
+            id="category"
             name="category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="w-full border p-2 rounded"
-            placeholder="Category"
+            placeholder="Post category"
           />
-          {formState?.errors?.category && (
+          {/* Category */}
+          {hasErrors(formState) && formState.errors.category && (
             <p className="text-red-600 text-sm mt-1">{formState.errors.category}</p>
           )}
         </div>
@@ -117,9 +145,11 @@ export default function EditPostForm({ post }: Props) {
 
           {featuredImage ? (
             <div className="mb-2">
-              <img
+              <NextImage
                 src={featuredImage.url}
                 alt="Featured"
+                width={800}
+                height={320}
                 className="w-full h-40 object-cover rounded"
               />
             </div>
@@ -156,18 +186,71 @@ export default function EditPostForm({ post }: Props) {
           <input type="hidden" name="featuredImageId" value={featuredImage?.id || ''} />
         </div>
 
+        {/* SEO Title */}
+        <div>
+          <label htmlFor="seoTitle" className="block text-sm font-medium mb-1">
+            SEO Title
+          </label>
+          <input
+            name="seoTitle"
+            type="text"
+            value={seoTitle}
+            onChange={(e) => setSeoTitle(e.target.value)}
+            className="w-full border p-2 rounded"
+            placeholder="Custom title for search engines"
+            required
+          />
+          <div className="flex justify-between text-sm text-zinc-500 mt-1">
+            <span className={seoTitle.length > 60 ? "text-orange-600" : ""}>
+              {seoTitle.length} / 60
+            </span>
+            {/* SEO Title */}
+            {hasErrors(formState) && formState.errors.seoTitle && (
+              <span className="text-red-600">{formState.errors.seoTitle}</span>
+            )}
+          </div>
+        </div>
+
+        {/* SEO Description */}
+        <div>
+          <label htmlFor="seoDescription" className="block text-sm font-medium mb-1">
+            SEO Description
+          </label>
+          <textarea
+            name="seoDescription"
+            value={seoDescription}
+            onChange={(e) => setSeoDescription(e.target.value)}
+            rows={3}
+            className="w-full border p-2 rounded"
+            placeholder="Meta description for search and social"
+            required
+          />
+          <div className="flex justify-between text-sm text-zinc-500 mt-1">
+            <span className={seoDescription.length > 160 ? "text-orange-600" : ""}>
+              {seoDescription.length} / 160
+            </span>
+            {/* SEO Description */}
+            {hasErrors(formState) && formState.errors.seoDescription && (
+              <span className="text-red-600">{formState.errors.seoDescription}</span>
+            )}
+          </div>
+        </div>
+
+
         <div className="border rounded p-2">
-          <TiptapEditor ref={editorRef} content={post.content} />
-          {formState?.errors?.content && (
+          <TiptapEditor ref={editorRef} content={(post.content ?? { type: 'doc', content: [] }) as JSONContent} />
+          {hasErrors(formState) && formState.errors.content && (
             <p className="text-red-600 text-sm mt-2">{formState.errors.content}</p>
           )}
         </div>
-
         <button
           type="submit"
-          className="bg-black text-white px-4 py-2 rounded disabled:opacity-50"
           disabled={isPending}
+          className="w-40 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition text-center flex items-center justify-center gap-2 disabled:opacity-50"
         >
+          {isPending && (
+            <span className="inline-block w-4 h-4 border-2 border-zinc-700 dark:border-zinc-200 border-t-transparent rounded-full animate-spin" />
+          )}
           {isPending ? 'Saving...' : 'Update Post'}
         </button>
       </form>

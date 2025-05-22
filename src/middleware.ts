@@ -1,32 +1,27 @@
-import { auth } from "@/auth";
+import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
-export default auth((req: NextRequest) => {
-  const url = req.nextUrl;
+export default withAuth(
+  function middleware(req) {
+    const { pathname } = req.nextUrl;
+    const isDashboard = pathname.startsWith("/dashboard");
+    const isLoggedIn = !!req.nextauth.token;
 
-  // 🔒 Safely access req.auth (may be undefined)
-  const isLoggedIn = !!(req as any).auth?.user;
-  const isOnLoginPage = url.pathname === "/login";
-  const isOnDashboard = url.pathname.startsWith("/dashboard");
+    // Optional redirect if logged-in users try to hit /login (no matcher needed for this to work if redirect is done in component)
+    if (isLoggedIn && pathname === "/login") {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
 
-  console.log("✅ Middleware is running!");
-  console.log("📌 Requested URL:", req.url);
-  console.log("🔍 Authenticated:", isLoggedIn);
-
-  // ✅ Redirect logged-in users away from login
-  if (isLoggedIn && isOnLoginPage) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return NextResponse.next();
+  },
+  {
+    callbacks: {
+      authorized: ({ token }) => !!token,
+    },
   }
+);
 
-  // ✅ Redirect unauthenticated users away from dashboard
-  if (!isLoggedIn && isOnDashboard) {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
-  return NextResponse.next();
-});
-
+// ✅ Only apply auth middleware to dashboard paths
 export const config = {
-  matcher: ["/login", "/dashboard/:path*"], // ✅ Avoid matching /api routes
+  matcher: ["/dashboard/:path*"], // ✅ no "/login" here
 };

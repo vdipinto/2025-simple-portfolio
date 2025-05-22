@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
+import NextImage from 'next/image'
 
 type Image = {
   id: string
@@ -53,9 +54,11 @@ export default function MediaLibrary({ open, onClose, onSelect }: Props) {
                   onClose()
                 }}
               >
-                <img
+                <NextImage
                   src={image.url}
                   alt={image.alt || ''}
+                  width={400} // or something matching your layout
+                  height={128}
                   className="object-cover w-full h-32"
                 />
               </button>

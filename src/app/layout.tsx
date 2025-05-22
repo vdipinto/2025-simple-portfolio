@@ -3,7 +3,7 @@ import { Space_Grotesk, Public_Sans } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/ui/Header";
 import { ThemeProvider } from "@/components/theme-provider";
-import { SessionProvider } from "next-auth/react";
+import { SessionWrapper } from "@/components/providers/SessionWrapper";
 import ClientBreadcrumbs from "@/components/navigation/ClientBreadcrumbs";
 
 const spaceGrotesk = Space_Grotesk({
@@ -34,7 +34,7 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${publicSans.variable} antialiased`}
       >
-        <SessionProvider>
+        <SessionWrapper>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -42,13 +42,10 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <Header />
-
-             {/* 2️⃣ Breadcrumbs immediately after the header */}
-             <ClientBreadcrumbs />
-
+            <ClientBreadcrumbs />
             {children}
           </ThemeProvider>
-        </SessionProvider>
+        </SessionWrapper>
       </body>
     </html>
   );

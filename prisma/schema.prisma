@@ -36,16 +36,25 @@ model Post {
 }
 
 model Category {
-  id    String @id @default(cuid())
-  name  String @unique
-  posts Post[]
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  posts       Post[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Tag {
-  id    String @id @default(cuid())
-  name  String @unique
-  posts Post[] @relation("PostTags")
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  posts       Post[]   @relation("PostTags")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
+
 
 model Image {
   id         String   @id @default(cuid())
@@ -72,9 +81,10 @@ model PostImage {
 }
 
 model User {
-  id        String @id @default(cuid())
-  firstName String
-  lastName  String
-  email     String @unique
-  password  String
+  id            String   @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String   @unique
+  password      String
+  emailVerified DateTime?
 }

@@ -8,17 +8,27 @@ import { slugify } from '@/lib/slugify'
 import clsx from 'clsx'
 import { toast } from 'sonner'
 import MediaLibraryClient from '@/components/dashboard/MediaLibraryClient'
+import type { FormState } from '@/actions/actions'
+import type { JSONContent } from '@tiptap/react'
+import Image from 'next/image'
+
+function hasErrors(formState: FormState | null): formState is Exclude<FormState, { success: true }> {
+  return formState !== null && formState.success === false
+}
 
 export default function CreatePostPage() {
   const router = useRouter()
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
-  const [formState, setFormState] = useState<any>(null)
+  const [category, setCategory] = useState('')
+  const [seoTitle, setSeoTitle] = useState('')
+  const [seoDescription, setSeoDescription] = useState('')
+  const [formState, setFormState] = useState<FormState | null>(null)
   const [isPending, startTransition] = useTransition()
-  const editorRef = useRef<{ getContent: () => any }>(null)
+  const editorRef = useRef<{ getContent: () => JSONContent }>(null)
 
   // 🖼️ Featured image
-  const [featuredImage, setFeaturedImage] = useState<{ id: string, url: string } | null>(null)
+  const [featuredImage, setFeaturedImage] = useState<{ id: string; url: string } | null>(null)
   const [mediaOpen, setMediaOpen] = useState(false)
 
   useEffect(() => {
@@ -31,9 +41,16 @@ export default function CreatePostPage() {
     const formData = new FormData(e.currentTarget)
     const content = editorRef.current?.getContent()
     formData.set('content', JSON.stringify(content))
+    formData.set('seoTitle', seoTitle)
+    formData.set('seoDescription', seoDescription)
+    formData.set('category', category)
 
     if (featuredImage) {
       formData.set('featuredImageId', featuredImage.id)
+      formData.set('seoImageId', featuredImage.id) // 👈 auto-use featured image for SEO
+    } else {
+      formData.set('featuredImageId', '')
+      formData.set('seoImageId', '')
     }
 
     startTransition(async () => {
@@ -63,7 +80,9 @@ export default function CreatePostPage() {
             className="w-full border p-2 rounded"
             placeholder="Title"
           />
-          {formState?.errors?.title && <p className="text-red-600 text-sm mt-1">{formState.errors.title}</p>}
+          {hasErrors(formState) && formState.errors.title && (
+            <p className="text-red-600 text-sm mt-1">{formState.errors.title}</p>
+          )}
         </div>
 
         <div>
@@ -71,18 +90,25 @@ export default function CreatePostPage() {
             name="slug"
             value={slug}
             readOnly
-            className={clsx(
-              'w-full border p-2 rounded',
-              formState?.errors?.slug && 'border-red-500'
-            )}
+            className={clsx('w-full border p-2 rounded', hasErrors(formState) && formState.errors.slug && 'border-red-500')}
             placeholder="Slug will be generated automatically"
           />
-          {formState?.errors?.slug && <p className="text-red-600 text-sm mt-1">{formState.errors.slug}</p>}
+          {hasErrors(formState) && formState.errors.slug && (
+            <p className="text-red-600 text-sm mt-1">{formState.errors.slug}</p>
+          )}
         </div>
 
         <div>
-          <input name="category" className="w-full border p-2 rounded" placeholder="Category" />
-          {formState?.errors?.category && <p className="text-red-600 text-sm mt-1">{formState.errors.category}</p>}
+          <input
+            name="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full border p-2 rounded"
+            placeholder="Category"
+          />
+          {hasErrors(formState) && formState.errors.category && (
+            <p className="text-red-600 text-sm mt-1">{formState.errors.category}</p>
+          )}
         </div>
 
         <label className="flex items-center gap-2 text-sm">
@@ -96,7 +122,13 @@ export default function CreatePostPage() {
 
           {featuredImage ? (
             <div className="mb-2">
-              <img src={featuredImage.url} alt="Featured" className="w-full h-40 object-cover rounded" />
+              <Image
+                src={featuredImage.url}
+                alt="Featured"
+                width={800}
+                height={320}
+                className="w-full h-40 object-cover rounded"
+              />
             </div>
           ) : (
             <p className="text-sm text-gray-500 mb-2">No image selected.</p>
@@ -113,19 +145,70 @@ export default function CreatePostPage() {
           <input type="hidden" name="featuredImageId" value={featuredImage?.id || ''} />
         </div>
 
+        {/* SEO Title */}
+        <div>
+          <label htmlFor="seoTitle" className="block text-sm font-medium mb-1">
+            SEO Title
+          </label>
+          <input
+            name="seoTitle"
+            type="text"
+            value={seoTitle}
+            onChange={(e) => setSeoTitle(e.target.value)}
+            className="w-full border p-2 rounded"
+            placeholder="Custom title for search engines"
+            required
+          />
+          <div className="flex justify-between text-sm text-zinc-500 mt-1">
+            <span className={seoTitle.length > 60 ? 'text-orange-600' : ''}>
+              {seoTitle.length} / 60
+            </span>
+            {hasErrors(formState) && formState.errors.seoTitle && (
+              <span className="text-red-600">{formState.errors.seoTitle}</span>
+            )}
+          </div>
+        </div>
+
+        {/* SEO Description */}
+        <div>
+          <label htmlFor="seoDescription" className="block text-sm font-medium mb-1">
+            SEO Description
+          </label>
+          <textarea
+            name="seoDescription"
+            value={seoDescription}
+            onChange={(e) => setSeoDescription(e.target.value)}
+            rows={3}
+            className="w-full border p-2 rounded"
+            placeholder="Meta description for search and social"
+            required
+          />
+          <div className="flex justify-between text-sm text-zinc-500 mt-1">
+            <span className={seoDescription.length > 160 ? 'text-orange-600' : ''}>
+              {seoDescription.length} / 160
+            </span>
+            {hasErrors(formState) && formState.errors.seoDescription && (
+              <span className="text-red-600">{formState.errors.seoDescription}</span>
+            )}
+          </div>
+        </div>
+
         <div className="border rounded p-2">
           <TiptapEditor ref={editorRef} content={{ type: 'doc', content: [] }} />
-          {formState?.errors?.content && (
+          {hasErrors(formState) && formState.errors.content && (
             <p className="text-red-600 text-sm mt-2">{formState.errors.content}</p>
           )}
         </div>
 
         <button
           type="submit"
-          className="bg-black text-white px-4 py-2 rounded disabled:opacity-50"
           disabled={isPending}
+          className="w-40 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition text-center flex items-center justify-center gap-2 disabled:opacity-50"
         >
-          {isPending ? 'Publishing...' : 'Publish Post'}
+          {isPending && (
+            <span className="inline-block w-4 h-4 border-2 border-zinc-700 dark:border-zinc-200 border-t-transparent rounded-full animate-spin" />
+          )}
+          {isPending ? 'Saving...' : 'Update Post'}
         </button>
       </form>
 
@@ -137,7 +220,6 @@ export default function CreatePostPage() {
           setFeaturedImage(image)
           setMediaOpen(false)
         }}
-        images={[]} // You should fetch them if needed
       />
     </div>
   )

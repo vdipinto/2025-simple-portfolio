@@ -1,32 +1,36 @@
-'use client'
+'use client';
 
-import { useActionState } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { register } from '@/actions/actions'
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { useActionState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { createSignUpHandler } from '@/lib/auth/client-signup';
 
 export function SignUpForm({
   className,
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
-  const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+}: React.ComponentPropsWithoutRef<'div'>) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
-  const [errorMessage, formAction, isPending] = useActionState(register, undefined)
+  const [errorMessage, formAction, isPending] = useActionState(
+    createSignUpHandler(router, callbackUrl),
+    undefined
+  );
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Create an account</CardTitle>
@@ -93,5 +97,5 @@ export function SignUpForm({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

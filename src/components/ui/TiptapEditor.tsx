@@ -9,6 +9,8 @@ import clsx from 'clsx'
 import { forwardRef, useImperativeHandle, useState, useEffect } from 'react'
 import { ImageNode } from '@/extensions/ImageNode'
 import MediaLibraryClient from '@/components/dashboard/MediaLibraryClient'
+import Link from '@tiptap/extension-link'
+import type { JSONContent } from '@tiptap/react'
 
 type Image = {
   id: string
@@ -64,6 +66,37 @@ const MenuBar = ({ editor }: { editor: Editor }) => {
         <button type="button" onClick={() => editor.chain().focus().undo().run()} className={buttonBase}>Undo</button>
         <button type="button" onClick={() => editor.chain().focus().redo().run()} className={buttonBase}>Redo</button>
         <button type="button" onClick={() => setMediaOpen(true)} className={buttonBase}>Image</button>
+        <button type="button" onClick={() => setMediaOpen(true)} className={buttonBase}>
+          Image
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            const url = window.prompt('Enter URL')
+            if (url) {
+              editor
+                .chain()
+                .focus()
+                .extendMarkRange('link')
+                .setLink({ href: url })
+                .run()
+            }
+          }}
+          className={clsx(buttonBase, editor.isActive('link') && 'bg-black text-white')}
+        >
+          Link
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            editor.chain().focus().unsetLink().run()
+          }}
+          className={buttonBase}
+        >
+          Unlink
+        </button>
       </div>
 
       {mediaOpen && (
@@ -82,8 +115,8 @@ const MenuBar = ({ editor }: { editor: Editor }) => {
 }
 
 export const TiptapEditor = forwardRef(function TiptapEditor(
-  { content }: { content?: any },
-  ref: React.Ref<{ getContent: () => any }>
+  { content }: { content?: JSONContent },
+  ref: React.Ref<{ getContent: () => JSONContent }>
 ) {
   const editor = useEditor({
     content,
@@ -96,13 +129,21 @@ export const TiptapEditor = forwardRef(function TiptapEditor(
       TextStyle,
       ListItem,
       ImageNode,
+      Link.configure({
+        openOnClick: false,
+        autolink: true,
+        linkOnPaste: true,
+        HTMLAttributes: {
+          class: 'text-blue-600 underline',
+        },
+      }),
     ],
     autofocus: true,
     immediatelyRender: false,
   })
 
-   // ✅ Safe fallback for getContent
-   useImperativeHandle(ref, () => ({
+  // ✅ Safe fallback for getContent
+  useImperativeHandle(ref, () => ({
     getContent: () => {
       if (!editor) {
         return { type: 'doc', content: [] }

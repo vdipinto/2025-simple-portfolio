@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut, signIn } from "next-auth/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FiUser } from "react-icons/fi";
+import Link from "next/link";
 
 export default function UserMenu() {
   const { data: session, status } = useSession();
@@ -39,8 +40,8 @@ export default function UserMenu() {
             </DropdownMenuItem>
           </>
         ) : (
-          <DropdownMenuItem onClick={() => window.location.href = "/login"}>
-            Login
+          <DropdownMenuItem asChild>
+            <Link href="/login">Login</Link>
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>

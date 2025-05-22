@@ -6,6 +6,7 @@ import { Trash2, Clipboard } from 'lucide-react'
 import { toast } from 'sonner'
 import { deleteImage } from '@/actions/actions'
 import { UploadButton } from '@/utils/uploadthing'
+import NextImage from 'next/image'
 
 type Image = {
   id: string
@@ -47,22 +48,28 @@ export default function MediaManager({ images: initialImages }: Props) {
         <UploadButton
           endpoint="imageUploader"
           onClientUploadComplete={(res) => {
-            if (!res) return
-            toast.success('Image uploaded!')
+            if (!res) return;
+            toast.success('Image uploaded!');
 
-            const newImage = res[0]
+            const newImage = res[0];
             setImages((prev) => [
               {
-                id: newImage.key, // not the actual DB ID, just a placeholder for optimistic UI
+                id: newImage.key,
                 url: newImage.url,
                 alt: newImage.name,
                 uploadedAt: new Date().toISOString(),
               },
               ...prev,
-            ])
+            ]);
           }}
           onUploadError={(error) => {
-            toast.error(`Upload failed: ${error.message}`)
+            if (error.message.includes("FileSizeMismatch")) {
+              toast.error("File too large! Max size is 4MB.");
+            } else if (error.message.includes("Invalid file type")) {
+              toast.error("Only image files are allowed.");
+            } else {
+              toast.error(`Upload failed: ${error.message}`);
+            }
           }}
         />
       </div>
@@ -73,9 +80,11 @@ export default function MediaManager({ images: initialImages }: Props) {
             key={image.id}
             className="relative group border rounded overflow-hidden"
           >
-            <img
+            <NextImage
               src={image.url}
               alt={image.alt || ''}
+              width={400}     // adjust based on layout
+              height={160}    // matches `h-40`
               className="object-cover w-full h-40 cursor-pointer"
               onClick={() => handleCopy(image.url)}
             />

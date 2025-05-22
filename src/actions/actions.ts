@@ -1,12 +1,11 @@
 "use server"
 
-import { signIn } from "@/auth"; // ✅ Now works with `@/`
-import { AuthError } from 'next-auth';
 import { slugify } from '@/lib/slugify'
 import { prisma } from "@/lib/db";
 import { redirect } from 'next/navigation'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod';
+import { calculateReadingTime } from '@/lib/calculate-reading-time'
 
 
 
@@ -15,28 +14,39 @@ const CreatePostSchema = z.object({
   slug: z.string().min(1, 'Slug is required'),
   category: z.string().min(1, 'Category is required'),
   published: z.boolean(),
-  featuredImageId: z.string().optional().nullable(), // ✅ new line
   content: z.object({
     type: z.literal('doc'),
     content: z.array(z.any()),
   }).refine((val) => val.content.length > 0, {
     message: 'Post content cannot be empty',
   }),
+  featuredImageId: z.string().optional().nullable(),
+  seoImageId: z.string().optional().nullable(),  // <-- Add this line
+  seoTitle: z
+    .string()
+    .min(1, 'SEO title is required')
+    .max(60, 'SEO title must be 60 characters or less'),
+  seoDescription: z
+    .string()
+    .min(1, 'SEO description is required')
+    .max(160, 'SEO description must be 160 characters or less'),
 })
 
-type FormState =
+export type FormState =
   | { success: true; slug: string }
   | {
-      success: false
-      errors: Partial<{
-        title: string
-        slug: string
-        category: string
-        content: string
-        featuredImageId: string // ✅ optional error support
-        general: string
-      }>
-    }
+    success: false
+    errors: Partial<{
+      title: string
+      slug: string
+      category: string
+      content: string
+      featuredImageId: string
+      seoTitle: string        // ✅ added
+      seoDescription: string  // ✅ added
+      general: string
+    }>
+  }
 
 const UpdatePostSchema = z.object({
   slug: z.string().min(1, 'Missing post identifier'),
@@ -50,23 +60,40 @@ const UpdatePostSchema = z.object({
     message: 'Post content cannot be empty',
   }),
   featuredImageId: z.string().nullable().optional(),
+  seoImageId: z.string().nullable().optional(),  // <-- Add this line
+  // ✅ With max length validations
+  seoTitle: z
+    .string()
+    .min(1, 'SEO title is required')
+    .max(60, 'SEO title must be 60 characters or less'),
+
+  seoDescription: z
+    .string()
+    .min(1, 'SEO description is required')
+    .max(160, 'SEO description must be 160 characters or less'),
 })
-    
-type UpdatePostResult =
+
+export type UpdatePostResult =
   | { success: true; published: boolean }
   | {
-      success: false
-      message?: string
-      errors?: Partial<{
-        title: string
-        slug: string
-        category: string
-        content: string
-        general: string
-      }>
-    }
+      success: false;
+      message?: string;
+      errors: Partial<{
+        title: string;
+        slug: string;
+        category: string;
+        content: string;
+        featuredImageId: string;
+        seoTitle: string;
+        seoDescription: string;
+        general: string;
+      }>;
+    };
 
-export async function createPost(prevState: any, formData: FormData): Promise<FormState> {
+export async function createPost(
+  _prevState: unknown,
+  formData: FormData
+): Promise<FormState> {
   try {
     const raw = {
       title: formData.get('title')?.toString() || '',
@@ -76,16 +103,14 @@ export async function createPost(prevState: any, formData: FormData): Promise<Fo
       category: formData.get('category')?.toString() || '',
       published: formData.get('published') === 'on',
       content: JSON.parse(formData.get('content')?.toString() || '{}'),
-      featuredImageId: formData.get('featuredImageId')?.toString() || null, // ✅ add this
+      featuredImageId: formData.get('featuredImageId')?.toString() || null,
+      seoImageId: formData.get('seoImageId')?.toString() || null,
+      seoTitle: formData.get('seoTitle')?.toString() || '',
+      seoDescription: formData.get('seoDescription')?.toString() || '',
     }
 
-    // Debug: log raw values
-    console.log('🧾 Raw parsed data:', raw)
-
-    // Validate input with Zod
     const data = CreatePostSchema.parse(raw)
 
-    // Optional: check if slug already exists
     const existing = await prisma.post.findUnique({
       where: { slug: data.slug },
     })
@@ -99,14 +124,36 @@ export async function createPost(prevState: any, formData: FormData): Promise<Fo
       }
     }
 
+    const normalizedName = data.category.trim()
+    const displayName =
+      normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1)
+    const categorySlug = slugify(normalizedName.toLowerCase())
+
+    const category = await prisma.category.upsert({
+      where: { slug: categorySlug },
+      update: {},
+      create: {
+        name: displayName,
+        slug: categorySlug,
+      },
+    })
+
+    // 🧠 Calculate reading time from tiptap content
+    const readingTime = calculateReadingTime(data.content)
+
     const post = await prisma.post.create({
       data: {
         title: data.title,
         slug: data.slug,
-        category: data.category,
-        published: data.published,
         content: data.content,
-        featuredImageId: formData.get('featuredImageId')?.toString() || null,
+        published: data.published,
+        publishedAt: data.published ? new Date() : undefined, // Fixed here
+        featuredImageId: data.featuredImageId || undefined,
+        seoImageId: data.seoImageId || data.featuredImageId || undefined,
+        seoTitle: data.seoTitle,
+        seoDescription: data.seoDescription,
+        readingTime,
+        categoryId: category.id, // Corrected here
       },
     })
 
@@ -121,6 +168,9 @@ export async function createPost(prevState: any, formData: FormData): Promise<Fo
           slug: errors.slug?.[0],
           category: errors.category?.[0],
           content: errors.content?.[0],
+          featuredImageId: errors.featuredImageId?.[0],
+          seoTitle: errors.seoTitle?.[0],
+          seoDescription: errors.seoDescription?.[0],
         },
       }
     }
@@ -135,38 +185,78 @@ export async function createPost(prevState: any, formData: FormData): Promise<Fo
   }
 }
 
-export async function updatePost(_: any, formData: FormData): Promise<UpdatePostResult> {
+
+
+
+export async function updatePost(
+  _prevState: unknown,
+  formData: FormData
+): Promise<UpdatePostResult> {
   try {
     const raw = {
-      slug: formData.get('slug')?.toString() || '',
-      title: formData.get('title')?.toString() || '',
-      category: formData.get('category')?.toString() || '',
-      published: (formData.get('published') === 'on') as boolean,
-      content: JSON.parse(formData.get('content')?.toString() || '{}'),
-      featuredImageId: formData.get('featuredImageId')?.toString() || null, // ✅ add this
+      slug: formData.get("slug")?.toString() || "",
+      title: formData.get("title")?.toString() || "",
+      category: formData.get("category")?.toString() || "",
+      published: formData.get("published") === "on",
+      content: JSON.parse(formData.get("content")?.toString() || "{}"),
+      featuredImageId: formData.get("featuredImageId")?.toString() || null,
+      seoTitle: formData.get("seoTitle")?.toString() || "",
+      seoDescription: formData.get("seoDescription")?.toString() || "",
+      seoImageId: formData.get("seoImageId")?.toString() || null,
+    };
+
+    const data = UpdatePostSchema.parse(raw);
+
+    const existingPost = await prisma.post.findUnique({
+      where: { slug: data.slug },
+    });
+
+    if (!existingPost) {
+      return {
+        success: false,
+        message: "Post not found",
+        errors: {}, // Must include errors object
+      };
     }
 
-    console.log('🧾 Update raw data:', raw)
+    const readingTime = calculateReadingTime(data.content);
 
-    const data = UpdatePostSchema.extend({
-      featuredImageId: z.string().nullable().optional(),
-    }).parse(raw)
+    const normalizedName = data.category.trim();
+    const displayName =
+      normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1);
+    const categorySlug = slugify(normalizedName.toLowerCase());
+
+    const category = await prisma.category.upsert({
+      where: { slug: categorySlug },
+      update: {},
+      create: {
+        name: displayName,
+        slug: categorySlug,
+      },
+    });
+
+    const shouldSetPublishedAt = data.published && !existingPost.publishedAt;
 
     const updated = await prisma.post.update({
       where: { slug: data.slug },
       data: {
         title: data.title,
-        category: data.category,
-        published: data.published,
         content: data.content,
-        featuredImageId: data.featuredImageId || null, // ✅ replace or remove image
+        published: data.published,
+        publishedAt: shouldSetPublishedAt ? new Date() : undefined,
+        readingTime,
+        seoTitle: data.seoTitle,
+        seoDescription: data.seoDescription,
+        seoImageId: data.seoImageId || data.featuredImageId || null,
+        featuredImageId: data.featuredImageId || null,
+        categoryId: category.id,
       },
-    })
+    });
 
-    return { success: true, published: updated.published ?? false }
+    return { success: true, published: updated.published ?? false };
   } catch (err) {
     if (err instanceof z.ZodError) {
-      const errors = err.flatten().fieldErrors
+      const errors = err.flatten().fieldErrors;
       return {
         success: false,
         errors: {
@@ -175,22 +265,27 @@ export async function updatePost(_: any, formData: FormData): Promise<UpdatePost
           category: errors.category?.[0],
           content: errors.content?.[0],
           featuredImageId: errors.featuredImageId?.[0],
+          seoTitle: errors.seoTitle?.[0],
+          seoDescription: errors.seoDescription?.[0],
         },
-      }
+      };
     }
 
-    console.error('❌ Update post error:', err)
+    console.error("❌ Update post error:", err);
     return {
       success: false,
-      message: 'Something went wrong. Please try again.',
-    }
+      message: "Something went wrong. Please try again.",
+      errors: {}, // Always include errors object
+    };
   }
 }
 
 
 
 
-export async function deletePostBySlug(_: any, formData: FormData) {
+
+
+export async function deletePostBySlug(_prevState: unknown, formData: FormData) {
   const slug = formData.get('slug') as string
 
   if (!slug) {
@@ -210,67 +305,75 @@ export async function deletePostBySlug(_: any, formData: FormData) {
 
 
 export async function authenticate(
-    prevState: string | undefined,
-    formData: FormData,
-  ) {
-    try {
-      await signIn('credentials', formData);
-    } catch (error) {
-      if (error instanceof AuthError) {
-        switch (error.type) {
-          case 'CredentialsSignin':
-            return 'Invalid credentials.';
-          default:
-            return 'Something went wrong.';
-        }
-      }
-      throw error;
-    }
+  _prevState: string | undefined,
+  formData: FormData,
+) {
+  const email = formData.get("email")?.toString();
+  const password = formData.get("password")?.toString();
+  const callbackUrl = formData.get("redirectTo")?.toString() || "/dashboard";
+
+  if (!email || !password) {
+    return "Email and password are required.";
+  }
+
+  const parsed = z
+    .object({ email: z.string().email(), password: z.string().min(6) })
+    .safeParse({ email, password });
+
+  if (!parsed.success) {
+    return "Invalid email or password format.";
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) return "User not found.";
+
+  const isValid = await bcrypt.compare(password, user.password);
+  if (!isValid) return "Incorrect password.";
+
+  // ✅ At this point, credentials are valid.
+  // But server actions can't persist login.
+  // So redirect to the credentials callback manually.
+  redirect(
+    `/api/auth/callback/credentials?email=${encodeURIComponent(
+      email
+    )}&password=${encodeURIComponent(password)}&callbackUrl=${encodeURIComponent(
+      callbackUrl
+    )}`
+  );
+
+  // This line never runs, but required for return type
+  return null;
 }
+
 
 
 export async function register(_: unknown, formData: FormData) {
-  const firstName = formData.get('firstName') as string
-  const lastName = formData.get('lastName') as string
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-  const confirmPassword = formData.get('confirmPassword') as string
-  const redirectTo = (formData.get('redirectTo') as string) || '/dashboard'
+  const firstName = formData.get("firstName")?.toString();
+  const lastName = formData.get("lastName")?.toString();
+  const email = formData.get("email")?.toString();
+  const password = formData.get("password")?.toString();
+  const confirmPassword = formData.get("confirmPassword")?.toString();
 
   if (!firstName || !lastName || !email || !password || !confirmPassword) {
-    return 'All fields are required.'
+    return "All fields are required.";
   }
 
   if (password !== confirmPassword) {
-    return 'Passwords do not match.'
+    return "Passwords do not match.";
   }
 
-  const existingUser = await prisma.user.findUnique({ where: { email } })
-  if (existingUser) {
-    return 'User with that email already exists.'
-  }
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) return "User already exists.";
 
-  const hashedPassword = await bcrypt.hash(password, 10)
-
+  const hashed = await bcrypt.hash(password, 10);
   await prisma.user.create({
-    data: {
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword,
-    },
-  })
+    data: { firstName, lastName, email, password: hashed },
+  });
 
-  // ✅ Automatically log in the user
-  await signIn('credentials', {
-    email,
-    password,
-    redirect: false, // prevent double redirect
-  })
-
-  // ✅ Now redirect after successful login
-  redirect(redirectTo)
+  // ✅ Don't sign in or redirect from here — handled on the client
+  return null;
 }
+
 
 export async function getAllImages() {
   return await prisma.image.findMany({
@@ -278,15 +381,14 @@ export async function getAllImages() {
   })
 }
 
-export async function deleteImage(id: string) {
+export async function deleteImage(id: string): Promise<{ success: boolean; error?: string }> {
   try {
     await prisma.image.delete({
       where: { id },
     })
     return { success: true }
-  } catch (error) {
+  } catch (_error) {
+    console.error('🛑 Delete image error:', _error)
     return { success: false, error: 'Failed to delete image' }
   }
 }
-
-  

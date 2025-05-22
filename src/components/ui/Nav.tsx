@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { ModeToggle } from "./toggle-mode";
 import UserMenu from "@/components/ui/UserMenu";
 import MobileNav from "@/components/ui/mobile-nav"
-import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
 
 import {
   NavigationMenu,
@@ -127,8 +126,7 @@ const Nav = () => {
             className="h-full min-w-[220px] bg-transparent rounded-none text-2xl font-bold gap-2 [&_svg]:size-7"
           >
             <span className="flex items-center justify-center gap-2">
-              Hire me
-              <ArrowRightCircleIcon />
+              HIRE ME
             </span>
           </Button>
         </Link>
