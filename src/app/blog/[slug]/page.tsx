@@ -4,12 +4,14 @@ import PostContent from '@/components/blog/PostContent'
 import type { JSONContent } from '@tiptap/react'
 
 type Props = {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export default async function PostPage({ params }: Props) {
+  const { slug } = await params // <-- await here
+
   const post = await prisma.post.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
   })
 
   if (!post) return notFound()

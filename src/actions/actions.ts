@@ -2,7 +2,6 @@
 
 import { slugify } from '@/lib/slugify'
 import { prisma } from "@/lib/db";
-import { redirect } from 'next/navigation'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod';
 import { calculateReadingTime } from '@/lib/calculate-reading-time'
@@ -302,48 +301,6 @@ export async function deletePostBySlug(_prevState: unknown, formData: FormData) 
 }
 
 
-
-
-export async function authenticate(
-  _prevState: string | undefined,
-  formData: FormData,
-) {
-  const email = formData.get("email")?.toString();
-  const password = formData.get("password")?.toString();
-  const callbackUrl = formData.get("redirectTo")?.toString() || "/dashboard";
-
-  if (!email || !password) {
-    return "Email and password are required.";
-  }
-
-  const parsed = z
-    .object({ email: z.string().email(), password: z.string().min(6) })
-    .safeParse({ email, password });
-
-  if (!parsed.success) {
-    return "Invalid email or password format.";
-  }
-
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) return "User not found.";
-
-  const isValid = await bcrypt.compare(password, user.password);
-  if (!isValid) return "Incorrect password.";
-
-  // ✅ At this point, credentials are valid.
-  // But server actions can't persist login.
-  // So redirect to the credentials callback manually.
-  redirect(
-    `/api/auth/callback/credentials?email=${encodeURIComponent(
-      email
-    )}&password=${encodeURIComponent(password)}&callbackUrl=${encodeURIComponent(
-      callbackUrl
-    )}`
-  );
-
-  // This line never runs, but required for return type
-  return null;
-}
 
 
 

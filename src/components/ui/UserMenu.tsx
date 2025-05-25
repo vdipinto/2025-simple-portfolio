@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession, signOut, signIn } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +35,11 @@ export default function UserMenu() {
             <DropdownMenuItem disabled className="text-xs text-muted-foreground">
               {session.user?.email}
             </DropdownMenuItem>
+
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard">Dashboard</Link>
+            </DropdownMenuItem>
+
             <DropdownMenuItem onClick={() => signOut()}>
               Logout
             </DropdownMenuItem>

@@ -7,6 +7,7 @@ import type { JWT } from "next-auth/jwt";
 export const authConfig = {
   session: {
     strategy: "jwt",
+    maxAge: 60 * 60 * 24, // 1 day
   },
 
   callbacks: {

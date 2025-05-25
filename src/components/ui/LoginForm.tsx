@@ -1,8 +1,8 @@
 'use client'
 
-import { useActionState } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { authenticate } from '@/actions/actions'
+import { useState } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,13 +21,35 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
 
-  const [errorMessage, formAction, isPending] = useActionState(
-    authenticate,
-    undefined
-  )
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setIsLoading(true)
+    setErrorMessage(null)
+
+    const res = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+      callbackUrl,
+    })
+
+    setIsLoading(false)
+
+    if (res?.error) {
+      setErrorMessage("Invalid email or password.")
+    } else if (res?.ok) {
+      router.push(callbackUrl)
+    }
+  }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -39,7 +61,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={formAction} className="space-y-6">
+          <form onSubmit={onSubmit} className="space-y-6">
             <input type="hidden" name="redirectTo" value={callbackUrl} />
 
             <div className="grid gap-2">
@@ -50,6 +72,8 @@ export function LoginForm({
                 type="email"
                 placeholder="m@example.com"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
@@ -70,11 +94,13 @@ export function LoginForm({
                 placeholder="Enter password"
                 required
                 minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 
-            <Button className="w-full" aria-disabled={isPending}>
-              Login
+            <Button className="w-full" aria-disabled={isLoading} disabled={isLoading}>
+              {isLoading ? "Logging in..." : "Login"}
             </Button>
 
             {/* Optional: Google login */}

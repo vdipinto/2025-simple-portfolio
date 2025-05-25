@@ -9,6 +9,9 @@ import { ModeToggle } from "./toggle-mode";
 import UserMenu from "@/components/ui/UserMenu";
 import MobileNav from "@/components/ui/mobile-nav"
 
+const navLinkOverride = "rounded-none px-5 py-2";
+
+
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -57,6 +60,8 @@ const Nav = () => {
               <li className="flex h-16">
                 <NavigationMenuTrigger
                   className={cn(
+                    navigationMenuTriggerStyle(),
+                    navLinkOverride,
                     "h-full flex items-center justify-center",
                     pathname.startsWith("/services") && "text-primary"
                   )}
@@ -86,6 +91,7 @@ const Nav = () => {
                   <NavigationMenuLink
                     className={cn(
                       navigationMenuTriggerStyle(),
+                      navLinkOverride,
                       "h-full flex items-center justify-center",
                       pathname === "/blog" && "text-primary"
                     )}
@@ -103,6 +109,7 @@ const Nav = () => {
                   <NavigationMenuLink
                     className={cn(
                       navigationMenuTriggerStyle(),
+                      navLinkOverride,
                       "h-full flex items-center justify-center",
                       pathname === "/about" && "text-primary"
                     )}

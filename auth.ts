@@ -1,22 +1,19 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 export const authOptions = {
-  // ✅ Required for signing/verifying JWT & session cookies
-  secret: process.env.NEXTAUTH_SECRET, // ✅ Match .env variable name
-
-  session: {
-    strategy: "jwt",
-  },
+  secret: process.env.NEXTAUTH_SECRET,
+  session: { strategy: "jwt" },
+  pages: { signIn: "/login" },
 
   providers: [
     Credentials({
+      id: "credentials",  // <== Add this line explicitly!
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
@@ -39,19 +36,14 @@ export const authOptions = {
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) throw new Error("Incorrect password");
 
-        return {
-          id: user.id,
-          email: user.email,
-        };
+        return { id: user.id, email: user.email };
       },
     }),
   ],
 
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
-        token.user = user;
-      }
+      if (user) token.user = user;
       return token;
     },
     async session({ session, token }) {
@@ -60,5 +52,3 @@ export const authOptions = {
     },
   },
 };
-
-export default NextAuth(authOptions);
