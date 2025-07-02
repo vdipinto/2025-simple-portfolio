@@ -3,11 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "postinstall": "prisma generate"
+   "dev": "next dev",
+  "build": "next build",
+  "start": "next start",
+  "lint": "next lint",
+  "postinstall": "prisma generate"
+  },
+  "vercel": {
+    "build": {
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "scripts": {
+      "build": "pnpm run build"
+    },
+    "installCommand": "pnpm install --unsafe-perm"
   },
   "dependencies": {
     "@auth/core": "^0.39.1",
