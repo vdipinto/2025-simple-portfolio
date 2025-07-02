@@ -69,7 +69,7 @@ const Nav = () => {
                   Services
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[300px] gap-3 p-4">
+                  <ul className="grid w-[300px] gap-3 rounded-none">
                     {services.map((service) => (
                       <NavigationMenuListItem
                         key={service.title}

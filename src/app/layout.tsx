@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Public_Sans } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/ui/Header";
+import Footer from "@/components/sections/footer/Footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SessionWrapper } from "@/components/providers/SessionWrapper";
 import ClientBreadcrumbs from "@/components/navigation/ClientBreadcrumbs";
@@ -43,7 +44,10 @@ export default function RootLayout({
           >
             <Header />
             <ClientBreadcrumbs />
-            {children}
+            <main>
+              {children}
+            </main>
+            <Footer />
           </ThemeProvider>
         </SessionWrapper>
       </body>

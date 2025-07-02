@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Download } from "lucide-react";
+import Link from 'next/link'
 
 const HeroSection = () => {
   return (
@@ -54,32 +55,42 @@ const HeroSection = () => {
 
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          {/* Contact Me Button */}
-          <Button
-            className="w-full sm:w-auto px-8 py-5 text-lg font-semibold border border-white 
-             text-white bg-primary 
-             hover:bg-white hover:text-black 
-             dark:bg-black dark:text-white 
-             dark:hover:bg-white dark:hover:text-black 
-             transition-colors"
-          >
-            Contact Me
-            <ArrowRight className="ml-2 h-6 w-6" />
-          </Button>
+          <Link href="/contact">
+            {/* Contact Me Button */}
+            <Button
+              className="w-full sm:w-auto px-8 py-5 text-lg font-semibold border border-white 
+     text-white bg-primary 
+     hover:bg-white hover:text-black 
+     dark:bg-black dark:text-white 
+     dark:hover:bg-white dark:hover:text-black 
+     transition-colors"
+            >
+              Contact Me
+              <ArrowRight className="ml-2 h-6 w-6" />
+            </Button>
+          </Link>
 
 
-          {/* Download My CV Button */}
-          <Button
-            className="w-full sm:w-auto px-8 py-5 text-lg font-semibold border border-white 
-             text-white bg-primary 
-             hover:bg-white hover:text-black 
-             dark:bg-black dark:text-white 
-             dark:hover:bg-white dark:hover:text-black 
-             transition-colors"
+          {/* See My CV Button */}
+          <a
+            href="/Vito-Dipinto.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto"
           >
-            Download my CV
-            <Download className="ml-2 h-6 w-6" />
-          </Button>
+            <Button
+              className="w-full sm:w-auto px-8 py-5 text-lg font-semibold border border-white 
+               text-white bg-primary 
+               hover:bg-white hover:text-black 
+               dark:bg-black dark:text-white 
+               dark:hover:bg-white dark:hover:text-black 
+               transition-colors"
+            >
+              View My CV
+              <Download className="ml-2 h-6 w-6" />
+            </Button>
+          </a>
+
 
 
         </div>

@@ -7,8 +7,8 @@ export default function NotFound() {
       </p>
       <p className="text-muted-foreground animate-fade-in text-xs text-balance mb-8">
         If this is something egregiously bad, please drop a message to{" "}
-        <a className="underline" href="mailto:jono@robotostudio.com">
-          jono@robotostudio.com
+        <a className="underline" href="mailto:vito@vitodipinto.dev">
+          vito@vitodipinto.dev
         </a>
       </p>
       <a
