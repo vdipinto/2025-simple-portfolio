@@ -43,6 +43,8 @@ model Category {
   posts       Post[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+   /* NEW — back-relation for Project */
+  projects    Project[]
 }
 
 model Tag {
@@ -53,6 +55,8 @@ model Tag {
   posts       Post[]   @relation("PostTags")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  /* NEW — back-relation for Project */
+  projects    Project[] @relation("ProjectTags")
 }
 
 
@@ -68,6 +72,16 @@ model Image {
   featuredInPosts  Post[]      @relation("FeaturedImage")
   seoImageForPosts Post[]      @relation("SeoImage") // 👈 added this line
   usedInPosts      PostImage[] // many-to-many join table
+
+  // New relations for Page
+  featuredInPages  Page[]      @relation("PageFeaturedImage")
+  seoImageForPages Page[]      @relation("PageSeoImage")
+  usedInPages      PageImage[]
+
+  featuredInProjects  Project[]     @relation("ProjectFeaturedImage")
+  seoImageForProjects Project[]     @relation("ProjectSeoImage")
+  usedInProjects      ProjectImage[]
+
 }
 
 model PostImage {
@@ -88,3 +102,70 @@ model User {
   password      String
   emailVerified DateTime?
 }
+
+
+model Page {
+  id              String       @id @default(cuid())
+  title           String
+  slug            String       @unique
+  content         Json
+  published       Boolean      @default(false)
+  publishedAt     DateTime?
+  featuredImage   Image?       @relation("PageFeaturedImage", fields: [featuredImageId], references: [id])
+  featuredImageId String?
+  images          PageImage[]
+  seoTitle        String?
+  seoDescription  String?
+  seoImage        Image?       @relation("PageSeoImage", fields: [seoImageId], references: [id])
+  seoImageId      String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model PageImage {
+  id       String  @id @default(cuid())
+  page     Page    @relation(fields: [pageId], references: [id])
+  pageId   String
+  image    Image   @relation(fields: [imageId], references: [id])
+  imageId  String
+  caption  String?
+  position Int? // optional: useful for ordering in galleries
+}
+
+model Project {
+  id              String      @id @default(cuid())
+  title           String
+  slug            String      @unique
+  content         Json
+  category        Category?   @relation(fields: [categoryId], references: [id])
+  categoryId      String?
+  tags            Tag[]       @relation("ProjectTags")
+  published       Boolean     @default(false)
+  publishedAt     DateTime?
+  readingTime     Int?
+  featuredImage   Image?      @relation("ProjectFeaturedImage", fields: [featuredImageId], references: [id])
+  featuredImageId String?
+  images          ProjectImage[]
+  seoTitle        String?
+  seoDescription  String?
+  seoImage        Image?      @relation("ProjectSeoImage", fields: [seoImageId], references: [id])
+  seoImageId      String?
+
+  liveUrl         String?     // NEW
+  repoUrl         String?     // NEW
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+
+model ProjectImage {
+  id         String   @id @default(cuid())
+  project    Project  @relation(fields: [projectId], references: [id])
+  projectId  String
+  image      Image    @relation(fields: [imageId], references: [id])
+  imageId    String
+  caption    String?
+  position   Int?
+}
+
