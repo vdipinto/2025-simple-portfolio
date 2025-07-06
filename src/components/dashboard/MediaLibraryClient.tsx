@@ -68,9 +68,11 @@ export default function MediaLibraryClient({
               console.error('Upload error:', error)
             }}
           /> */}
+          
           <UploadButton
             endpoint="imageUploader"
             onClientUploadComplete={(res) => {
+              refreshImages()
               console.log("Upload complete:", res);
             }}
             onUploadError={(error: Error) => {

@@ -120,6 +120,13 @@ model Page {
   seoImageId      String?
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
+  type            PageType @default(GENERAL)   // ← NEW
+}
+
+enum PageType {
+  GENERAL
+  BLOG
+  CONTACT
 }
 
 model PageImage {

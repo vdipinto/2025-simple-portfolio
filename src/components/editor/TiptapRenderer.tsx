@@ -5,12 +5,16 @@ import StarterKit from '@tiptap/starter-kit'
 import TextStyle from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
 import Link from '@tiptap/extension-link'
-import { ImageNode } from '@/extensions/ImageNode' // if you're using this custom image extension
+import { ImageNode } from '@/extensions/ImageNode'
 import { useEffect, useState } from 'react'
 import type { JSONContent } from '@tiptap/react'
 
-export default function PostRenderer({ content }: { content: JSONContent }) {
+export default function TiptapRenderer({ content }: { content: JSONContent }) {
   const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const editor = useEditor({
     content,
@@ -36,10 +40,6 @@ export default function PostRenderer({ content }: { content: JSONContent }) {
     },
     immediatelyRender: false,
   })
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
 
   if (!isMounted || !editor) return null
 

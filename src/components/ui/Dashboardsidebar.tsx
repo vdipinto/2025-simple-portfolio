@@ -7,7 +7,9 @@ import { clsx } from 'clsx'
 const links = [
   { label: 'Dashboard', href: '/dashboard' },
   { label: 'Create Post', href: '/dashboard/post-new' },
-  { label: 'All Posts', href: '/dashboard/all-posts' }, // ✅ added this
+  { label: 'All Posts', href: '/dashboard/all-posts' },
+  { label: 'Create Page', href: '/dashboard/page-new' },
+  { label: 'All Pages', href: '/dashboard/all-pages' }, // ✅ added this
   { label: 'Media Library', href: '/dashboard/media' },
   { label: 'Settings', href: '/dashboard/settings' },
 ]
