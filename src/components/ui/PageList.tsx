@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 
-import { deletePageBySlug } from '@/actions/actions' // ❶ create in step 3
+import { deletePageBySlug } from "@/actions/pageActions";
 
 type Page = {
   id: string
