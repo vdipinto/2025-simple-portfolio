@@ -9,7 +9,12 @@ import { ImageNode } from '@/extensions/ImageNode'
 import { useEffect, useState } from 'react'
 import type { JSONContent } from '@tiptap/react'
 
-export default function TiptapRenderer({ content }: { content: JSONContent }) {
+type Props = {
+  content: JSONContent
+  className?: string
+}
+
+export default function TiptapRenderer({ content, className = 'prose dark:prose-invert' }: Props) {
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -35,7 +40,7 @@ export default function TiptapRenderer({ content }: { content: JSONContent }) {
     ],
     editorProps: {
       attributes: {
-        class: 'prose',
+        class: className,
       },
     },
     immediatelyRender: false,
