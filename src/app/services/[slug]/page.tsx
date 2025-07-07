@@ -4,26 +4,31 @@ import type { Metadata } from "next";
 import TiptapRenderer from "@/components/editor/TiptapRenderer";
 import Image from "next/image";
 
-// Only show these services
+// ✅ Only generate static pages for these slugs
 const serviceSlugs = [
   "sanity-website-development",
   "nextjs-app-development",
   "wordpress-website-development",
 ];
 
+// ✅ Generate static routes
 export async function generateStaticParams() {
   return serviceSlugs.map((slug) => ({ slug }));
 }
 
+// ✅ Fix type so we can await `params`
+type Params = Promise<{ slug: string }>;
+
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Params;
 }): Promise<Metadata> {
   const { slug } = await params;
 
   const page = await prisma.page.findUnique({
     where: { slug },
+    include: { seoImage: true },
   });
 
   if (!page) return {};
@@ -37,7 +42,7 @@ export async function generateMetadata({
 export default async function ServicePage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Params;
 }) {
   const { slug } = await params;
 
@@ -45,7 +50,7 @@ export default async function ServicePage({
 
   const page = await prisma.page.findUnique({
     where: { slug },
-    include: { featuredImage: true }, // ✅ include the image
+    include: { featuredImage: true },
   });
 
   if (!page) return notFound();
@@ -54,7 +59,6 @@ export default async function ServicePage({
     <main className="max-w-3xl mx-auto px-4 py-16 space-y-8">
       <h1 className="text-3xl font-bold">{page.title}</h1>
 
-      {/* ✅ Featured image */}
       {page.featuredImage?.url && (
         <Image
           src={page.featuredImage.url}
@@ -65,10 +69,10 @@ export default async function ServicePage({
         />
       )}
 
-      {/* ✅ Render tiptap content */}
-      <div className="prose dark:prose-invert">
-        <TiptapRenderer content={page.content as any} />
-      </div>
+      <TiptapRenderer
+        content={page.content as any}
+        className="prose dark:prose-invert max-w-none"
+      />
     </main>
   );
 }
