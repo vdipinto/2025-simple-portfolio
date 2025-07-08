@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DIRECT_DATABASE_URL") // for build-time (prisma generate / build)
+  url      = env("PRISMA_ACCELERATE_URL") // use accelerate at build time
 }
 
 model Post {
