@@ -1,7 +1,7 @@
 {
     "build": {
-      "env": {
-        "DIRECT_DATABASE_URL": "@direct-database-url"
-      }
+        "env": {
+            "DIRECT_DATABASE_URL": "@DIRECT_DATABASE_URL"
+        }
     }
-  }
+}
