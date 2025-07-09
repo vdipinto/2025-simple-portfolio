@@ -159,16 +159,19 @@ export async function updatePage(
 /* ------------------------------------------------------------------ */
 export async function deletePageBySlug(
   _prev: unknown,
-  formData: FormData
+  formData: FormData,
 ): Promise<{ success: boolean; message?: string }> {
-  const slug = formData.get("slug")?.toString();
-  if (!slug) return { success: false, message: "Missing page slug." };
+  const slug = formData.get('slug')?.toString();
 
-  try {
-    await prisma.page.delete({ where: { slug } });
-    return { success: true };
-  } catch (err) {
-    console.error("🚑 Delete page error:", err);
-    return { success: false, message: "Failed to delete page." };
+  if (!slug) {
+    return { success: false, message: 'Missing page slug.' };
   }
+
+  const { count } = await prisma.page.deleteMany({
+    where: { slug },
+  });
+
+  return count > 0
+    ? { success: true }
+    : { success: false, message: 'Page not found.' };
 }

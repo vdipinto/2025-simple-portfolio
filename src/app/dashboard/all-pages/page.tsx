@@ -1,13 +1,14 @@
-export const dynamic = 'force-dynamic';
-
 import { prisma } from '@/lib/db'
 import PageList from '@/components/ui/PageList'
+import type { Page } from '@prisma/client'
+
+export const dynamic = 'force-dynamic'
 
 export default async function AllPagesDashboardPage() {
-  // newest first – adjust as you like
-  const pages = await prisma.page.findMany({
+  const pages: Page[] = await prisma.page.findMany({
+    //where: { published: true },
     orderBy: { createdAt: 'desc' },
-    cacheStrategy: { ttl: 60 },   // ✔ no error
+    cacheStrategy: { ttl: 60 },
   })
 
   return (
