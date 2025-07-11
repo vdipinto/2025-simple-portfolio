@@ -23,6 +23,8 @@ export default async function EditPage({ params }: Props) {
   // 404 if it doesn't exist
   if (!page) return notFound()
 
+  console.log("Editing page type:", page.type);
+
   // ✅ Render the edit form
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-4">

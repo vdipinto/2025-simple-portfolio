@@ -31,15 +31,15 @@ export default function EditPageForm({ page }: Props) {
   const editorRef = useRef<{ getContent: () => JSONContent }>(null)
 
   /* ─────────── local state ─────────── */
-  const [title, setTitle]                 = useState(page.title)
-  const [slug]                            = useState(page.slug)      // read-only
-  const [published, setPublished]         = useState(page.published)
+  const [title, setTitle] = useState(page.title)
+  const [slug] = useState(page.slug)      // read-only
+  const [published, setPublished] = useState(page.published)
   const [featuredImage, setFeaturedImage] = useState<Image | null>(page.featuredImage ?? null)
-  const [seoTitle, setSeoTitle]           = useState(page.seoTitle ?? '')
+  const [seoTitle, setSeoTitle] = useState(page.seoTitle ?? '')
   const [seoDescription, setSeoDescription] = useState(page.seoDescription ?? '')
-  const [mediaOpen, setMediaOpen]         = useState(false)
-  const [formState, setFormState]         = useState<FormState | null>(null)
-  const [isPending, startTransition]      = useTransition()
+  const [mediaOpen, setMediaOpen] = useState(false)
+  const [formState, setFormState] = useState<FormState | null>(null)
+  const [isPending, startTransition] = useTransition()
 
   /* ─────────── submit handler ─────────── */
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -210,6 +210,21 @@ export default function EditPageForm({ page }: Props) {
               <span className="text-red-600">{formState.errors.seoDescription}</span>
             )}
           </div>
+        </div>
+
+        {/* Page Type */}
+        <div>
+          <label htmlFor="type" className="block text-sm font-medium mb-1">
+            Page Type
+          </label>
+          <select
+            name="type"
+            defaultValue={page.type ?? "GENERAL"}
+            className="w-full border p-2 rounded"
+          >
+            <option value="GENERAL">General</option>
+            <option value="SERVICES">Services</option>
+          </select>
         </div>
 
         {/* Rich-text editor */}

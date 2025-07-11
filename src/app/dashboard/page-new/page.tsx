@@ -68,6 +68,7 @@ export default function CreatePage() {
     });
   };
 
+
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-4">
       <h1 className="text-2xl font-bold">New Page</h1>
@@ -135,6 +136,19 @@ export default function CreatePage() {
             name="featuredImageId"
             value={featuredImage?.id || ""}
           />
+        </div>
+
+        {/* Selection type of page */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Page Type</label>
+          <select
+            name="type"
+            defaultValue="GENERAL"
+            className="w-full border p-2 rounded"
+          >
+            <option value="GENERAL">General</option>
+            <option value="SERVICES">Services</option>
+          </select>
         </div>
 
         {/* SEO fields */}

@@ -125,8 +125,7 @@ model Page {
 
 enum PageType {
   GENERAL
-  BLOG
-  CONTACT
+  SERVICES
 }
 
 model PageImage {

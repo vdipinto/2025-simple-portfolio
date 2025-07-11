@@ -5,8 +5,13 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "xsocd3chi5.ufs.sh", // UploadThing subdomain
-        pathname: "/f/*",              // Match image paths
+        hostname: "xsocd3chi5.ufs.sh", // Your UploadThing subdomain
+        pathname: "/f/*",
+      },
+      {
+        protocol: "https",
+        hostname: "utfs.io", // UploadThing's public CDN
+        pathname: "/f/*",
       },
     ],
   },

@@ -1,33 +1,17 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import type { Metadata } from "next";
-import TiptapRenderer from "@/components/editor/TiptapRenderer";
+import type { JSONContent } from "@tiptap/react";
+import PostContent from "@/components/blog/PostContent";
 import Image from "next/image";
 
-// ✅ Only generate static pages for these slugs
-const serviceSlugs = [
-  "sanity-website-development",
-  "nextjs-app-development",
-  "wordpress-website-development",
-];
-
-// ✅ Generate static routes
-export async function generateStaticParams() {
-  return serviceSlugs.map((slug) => ({ slug }));
-}
-
-// ✅ Fix type so we can await `params`
-type Params = Promise<{ slug: string }>;
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Params;
+export async function generateMetadata(props: {
+  params: { slug: string };
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug } = props.params;
 
-  const page = await prisma.page.findUnique({
-    where: { slug },
+  const page = await prisma.page.findFirst({
+    where: { slug, type: "SERVICES" },
     include: { seoImage: true },
   });
 
@@ -36,43 +20,47 @@ export async function generateMetadata({
   return {
     title: page.seoTitle ?? page.title,
     description: page.seoDescription ?? "",
+    openGraph: {
+      images: page.seoImage?.url
+        ? [{ url: page.seoImage.url.replace("xsocd3chi5.ufs.sh", "utfs.io") }]
+        : [],
+    },
   };
 }
 
-export default async function ServicePage({
-  params,
-}: {
-  params: Params;
-}) {
-  const { slug } = await params;
+type Props = {
+  params: { slug: string };
+};
 
-  if (!serviceSlugs.includes(slug)) return notFound();
+export default async function ServicesPage({ params }: Props) {
+  const { slug } = params;
 
-  const page = await prisma.page.findUnique({
-    where: { slug },
+  const page = await prisma.page.findFirst({
+    where: { slug, type: "SERVICES" },
     include: { featuredImage: true },
   });
 
   if (!page) return notFound();
 
-  return (
-    <main className="max-w-3xl mx-auto px-4 py-16 space-y-8">
-      <h1 className="text-3xl font-bold">{page.title}</h1>
+  const imageUrl = page.featuredImage?.url?.replace(
+    "xsocd3chi5.ufs.sh",
+    "utfs.io"
+  );
 
-      {page.featuredImage?.url && (
+  return (
+    <main className="max-w-3xl mx-auto p-6">
+      {imageUrl && (
         <Image
-          src={page.featuredImage.url}
-          alt={page.title}
+          src={imageUrl}
+          alt={page.featuredImage?.alt ?? page.title}
           width={800}
           height={400}
-          className="rounded-lg object-cover w-full h-auto"
+          className="rounded-lg object-cover w-full h-auto mb-6"
         />
       )}
 
-      <TiptapRenderer
-        content={page.content as any}
-        className="prose dark:prose-invert max-w-none"
-      />
+      <h1 className="text-4xl font-bold mb-6">{page.title}</h1>
+      <PostContent content={page.content as JSONContent} />
     </main>
   );
 }
