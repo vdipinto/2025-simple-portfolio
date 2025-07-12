@@ -40,7 +40,7 @@ export default function TiptapRenderer({ content, className = 'prose dark:prose-
     ],
     editorProps: {
       attributes: {
-        class: className,
+        class: 'prose dark:prose-invert min-h-[300px] focus:outline-none',
       },
     },
     immediatelyRender: false,

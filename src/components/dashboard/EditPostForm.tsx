@@ -12,6 +12,7 @@ import type { JSONContent } from '@tiptap/react'
 import NextImage from 'next/image'
 import type { FormState } from '@/actions/actions';
 import { hasErrors } from '@/utils/formHelpers'
+import { Button } from "@/components/ui/button"
 
 
 type Props = {
@@ -243,16 +244,17 @@ export default function EditPostForm({ post }: Props) {
             <p className="text-red-600 text-sm mt-2">{formState.errors.content}</p>
           )}
         </div>
-        <button
+        <Button
           type="submit"
+          variant="default"
           disabled={isPending}
-          className="w-40 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition text-center flex items-center justify-center gap-2 disabled:opacity-50"
+          className="w-40"
         >
           {isPending && (
-            <span className="inline-block w-4 h-4 border-2 border-zinc-700 dark:border-zinc-200 border-t-transparent rounded-full animate-spin" />
+            <span className="inline-block w-4 h-4 border-2 border-t-transparent border-primary-foreground rounded-full animate-spin" />
           )}
-          {isPending ? 'Saving...' : 'Update Post'}
-        </button>
+          {isPending ? "Saving..." : "Update Post"}
+        </Button>
       </form>
 
       {/* 📦 Media Library Modal */}

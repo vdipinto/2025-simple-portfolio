@@ -4,13 +4,12 @@ import { useEditor, EditorContent, Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import TextStyle from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
-import ListItem from '@tiptap/extension-list-item'
-import clsx from 'clsx'
 import { forwardRef, useImperativeHandle, useState, useEffect } from 'react'
 import { ImageNode } from '@/extensions/ImageNode'
 import MediaLibraryClient from '@/components/dashboard/MediaLibraryClient'
 import Link from '@tiptap/extension-link'
 import type { JSONContent } from '@tiptap/react'
+import { Button } from '@/components/ui/button'
 
 type Image = {
   id: string
@@ -49,29 +48,22 @@ const MenuBar = ({ editor }: { editor: Editor }) => {
     }).run()
   }
 
-  const buttonBase =
-    'px-2 py-1 text-sm rounded border border-gray-300 hover:bg-gray-100 transition'
-
   return (
     <>
       <div className="flex flex-wrap gap-2 mb-4">
-        <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={clsx(buttonBase, editor.isActive('bold') && 'bg-black text-white')}>Bold</button>
-        <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={clsx(buttonBase, editor.isActive('italic') && 'bg-black text-white')}>Italic</button>
-        <button type="button" onClick={() => editor.chain().focus().toggleStrike().run()} className={clsx(buttonBase, editor.isActive('strike') && 'bg-black text-white')}>Strike</button>
-        <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={clsx(buttonBase, editor.isActive('heading', { level: 2 }) && 'bg-black text-white')}>H2</button>
-        <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={clsx(buttonBase, editor.isActive('bulletList') && 'bg-black text-white')}>Bullet</button>
-        <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={clsx(buttonBase, editor.isActive('orderedList') && 'bg-black text-white')}>Ordered</button>
-        <button type="button" onClick={() => editor.chain().focus().toggleCodeBlock().run()} className={clsx(buttonBase, editor.isActive('codeBlock') && 'bg-black text-white')}>Code Block</button>
-        <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={clsx(buttonBase, editor.isActive('blockquote') && 'bg-black text-white')}>Quote</button>
-        <button type="button" onClick={() => editor.chain().focus().undo().run()} className={buttonBase}>Undo</button>
-        <button type="button" onClick={() => editor.chain().focus().redo().run()} className={buttonBase}>Redo</button>
-        <button type="button" onClick={() => setMediaOpen(true)} className={buttonBase}>Image</button>
-        <button type="button" onClick={() => setMediaOpen(true)} className={buttonBase}>
-          Image
-        </button>
-
-        <button
-          type="button"
+        <Button variant="default" onClick={() => editor.chain().focus().toggleBold().run()}>Bold</Button>
+        <Button variant="default" onClick={() => editor.chain().focus().toggleItalic().run()}>Italic</Button>
+        <Button variant="default" onClick={() => editor.chain().focus().toggleStrike().run()}>Strike</Button>
+        <Button variant="default" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>H2</Button>
+        <Button variant="default" onClick={() => editor.chain().focus().toggleBulletList().run()}>Bullet</Button>
+        <Button variant="default" onClick={() => editor.chain().focus().toggleOrderedList().run()}>Ordered</Button>
+        <Button variant="default" onClick={() => editor.chain().focus().toggleCodeBlock().run()}>Code Block</Button>
+        <Button variant="default" onClick={() => editor.chain().focus().toggleBlockquote().run()}>Quote</Button>
+        <Button variant="default" onClick={() => editor.chain().focus().undo().run()}>Undo</Button>
+        <Button variant="default" onClick={() => editor.chain().focus().redo().run()}>Redo</Button>
+        <Button variant="default" onClick={() => setMediaOpen(true)}>Image</Button>
+        <Button
+          variant="default"
           onClick={() => {
             const url = window.prompt('Enter URL')
             if (url) {
@@ -83,20 +75,10 @@ const MenuBar = ({ editor }: { editor: Editor }) => {
                 .run()
             }
           }}
-          className={clsx(buttonBase, editor.isActive('link') && 'bg-black text-white')}
         >
           Link
-        </button>
-
-        <button
-          type="button"
-          onClick={() => {
-            editor.chain().focus().unsetLink().run()
-          }}
-          className={buttonBase}
-        >
-          Unlink
-        </button>
+        </Button>
+        <Button variant="default" onClick={() => editor.chain().focus().unsetLink().run()}>Unlink</Button>
       </div>
 
       {mediaOpen && (
@@ -127,7 +109,6 @@ export const TiptapEditor = forwardRef(function TiptapEditor(
       }),
       Color.configure({ types: ['textStyle'] }),
       TextStyle,
-      ListItem,
       ImageNode,
       Link.configure({
         openOnClick: false,
@@ -140,16 +121,15 @@ export const TiptapEditor = forwardRef(function TiptapEditor(
     ],
     autofocus: true,
     immediatelyRender: false,
+    editorProps: {
+      attributes: {
+        class: "prose dark:prose-invert min-h-[300px] focus:outline-none",
+      },
+    },
   })
 
-  // ✅ Safe fallback for getContent
   useImperativeHandle(ref, () => ({
-    getContent: () => {
-      if (!editor) {
-        return { type: 'doc', content: [] }
-      }
-      return editor.getJSON()
-    },
+    getContent: () => editor?.getJSON() ?? { type: 'doc', content: [] },
   }))
 
   if (!editor) return null

@@ -9,6 +9,8 @@ const links = [
   { label: 'Create Post', href: '/dashboard/post-new' },
   { label: 'All Posts', href: '/dashboard/all-posts' },
   { label: 'Create Page', href: '/dashboard/page-new' },
+  { label: 'Create Project', href: '/dashboard/project-new' },
+  { label: 'All Projects', href: '/dashboard/all-projects' },
   { label: 'All Pages', href: '/dashboard/all-pages' }, // ✅ added this
   { label: 'Media Library', href: '/dashboard/media' },
   { label: 'Settings', href: '/dashboard/settings' },

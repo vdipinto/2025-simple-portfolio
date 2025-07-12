@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import clsx from "clsx";
 import Image from "next/image";
 import type { JSONContent } from "@tiptap/react";
+import { Button } from "@/components/ui/button"
 
 function hasErrors(
   s: PageFormState | null
@@ -213,16 +214,17 @@ export default function CreatePage() {
         </div>
 
         {/* Submit */}
-        <button
+        <Button
           type="submit"
+          variant="default"
           disabled={isPending}
-          className="w-40 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
+          className="w-40"
         >
           {isPending && (
-            <span className="inline-block w-4 h-4 border-2 border-zinc-700 dark:border-zinc-200 border-t-transparent rounded-full animate-spin" />
+            <span className="inline-block w-4 h-4 border-2 border-t-transparent border-primary-foreground rounded-full animate-spin" />
           )}
           {isPending ? "Saving..." : "Create Page"}
-        </button>
+        </Button>
       </form>
 
       {/* Media picker modal */}

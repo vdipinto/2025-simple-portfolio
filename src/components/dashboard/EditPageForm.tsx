@@ -4,18 +4,15 @@ import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import clsx from 'clsx'
-
 import { updatePage } from '@/actions/pageActions'          // 🔁 create this server-action
 import { hasErrors } from '@/utils/formHelpers'
-
 import MediaLibraryClient from '@/components/dashboard/MediaLibraryClient'
 import { TiptapEditor } from '@/components/ui/TiptapEditor'
-
 import type { Page, Image } from '@prisma/client'
 import type { JSONContent } from '@tiptap/react'
 import type { FormState } from '@/actions/actions'
-
 import NextImage from 'next/image'
+import { Button } from "@/components/ui/button"
 
 /* -------------------------------------------------------------------------- */
 
@@ -239,16 +236,17 @@ export default function EditPageForm({ page }: Props) {
         </div>
 
         {/* Submit button */}
-        <button
+        <Button
           type="submit"
+          variant="default"
           disabled={isPending}
-          className="w-40 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
+          className="w-40"
         >
           {isPending && (
-            <span className="inline-block w-4 h-4 border-2 border-zinc-700 dark:border-zinc-200 border-t-transparent rounded-full animate-spin" />
+            <span className="inline-block w-4 h-4 border-2 border-t-transparent border-primary-foreground rounded-full animate-spin" />
           )}
-          {isPending ? 'Saving...' : 'Update Page'}
-        </button>
+          {isPending ? "Saving..." : "Update Page"}
+        </Button>
       </form>
 
       {/* Media Library Modal */}
