@@ -1,91 +1,74 @@
+/* --- src/components/sections/FeaturedProject.tsx ---------------------- */
 import { prisma } from "@/lib/db";
-import Link from "next/link";
 import Image from "next/image";
 import { format } from "date-fns";
+import StretchedLink from "@/components/ui/StretchedLink";
+import { ViewCTA } from "@/components/ui/seeMore"; // adjust import casing if needed
 
 export default async function FeaturedProject() {
-  const post = await prisma.post.findFirst({
-    where: {
-      published: true,
-      title: {
-        contains: "how I built my portfolio website",
-        mode: "insensitive",
-      },
-    },
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      publishedAt: true,
-      readingTime: true,
-      featuredImage: true,
-    },
+  const project = await prisma.project.findFirst({
+    where: { published: true, publishedAt: { not: null } },
+    orderBy: { publishedAt: "desc" },
+    include: { featuredImage: true },
   });
 
-  if (!post) {
-    return (
-      <section className="w-full mx-auto px-4 border-b border-x border-zinc-200 dark:border-zinc-800">
-        <div className="border-x border-zinc-200 dark:border-zinc-800 -mt-px -mb-px">
-          <div className="w-full border-y border-y-zinc-200 dark:border-y-zinc-800 py-6 -my-px">
-            <h2 className="text-center font-mono text-[10px] tracking-[2px] text-zinc-600 dark:text-zinc-400 uppercase">
-              Featured Post
-            </h2>
-          </div>
-        </div>
-
-        <div className="px-6 py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
-          Post not found.
-        </div>
-      </section>
-    );
-  }
+  if (!project) return null;
 
   return (
     <section className="w-full mx-auto px-4 border-b border-x border-zinc-200 dark:border-zinc-800">
+      {/* Section header */}
       <div className="border-x border-zinc-200 dark:border-zinc-800 -mt-px -mb-px">
         <div className="w-full border-y border-y-zinc-200 dark:border-y-zinc-800 py-6 -my-px">
           <h2 className="text-center font-mono text-[10px] tracking-[2px] text-zinc-600 dark:text-zinc-400 uppercase">
-            Featured Post
+            Featured Project
           </h2>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-x border-zinc-200 dark:border-zinc-800">
-        <div className="w-full h-full">
-          <Image
-            src={post.featuredImage?.url || "/images/fallback.jpeg"}
-            alt={post.title}
-            width={800}
-            height={600}
-            className="w-full h-full object-cover"
-          />
+      {/* Card: text left, image right */}
+      <div className="relative group grid grid-cols-1 md:grid-cols-2 gap-0 border-x border-zinc-200 dark:border-zinc-800">
+        {/* Stretched link covers entire card */}
+        <StretchedLink
+          href={`/projects/${project.slug}`}
+          ariaLabel={`${project.title} – view project`}
+          className="cursor-pointer z-30"
+        />
 
-        </div>
-
-        <Link
-          href={`/blog/${post.slug}`}
-          className="group flex flex-col justify-center p-6
-    border-x border-b border-zinc-200 dark:border-zinc-800
-    hover:bg-zinc-50  dark:hover:bg-zinc-900
-    hover:border-zinc-200 dark:hover:border-zinc-800      /* keep border on hover */
-    transition-colors duration-200"
+        {/* Left: text */}
+        <div
+          className="order-1 flex flex-col justify-center p-6 
+                     border-x border-b border-zinc-200 dark:border-zinc-800
+                     transition-colors duration-200"
         >
           <h3 className="text-[24px] leading-[34px] font-medium group-hover:underline">
-            {post.title}
+            {project.title}
           </h3>
 
-          {(post.readingTime || post.publishedAt) && (
-            <div className="flex items-center gap-x-2 tracking-wider uppercase text-zinc-500 text-[12px] leading-[18px] mt-2">
-              {post.readingTime && <span>{post.readingTime} min read</span>}
-              {post.readingTime && post.publishedAt && <span>•</span>}
-              {post.publishedAt && (
-                <time dateTime={new Date(post.publishedAt).toISOString().split("T")[0]}>
-                  {format(new Date(post.publishedAt), "MMMM d, yyyy")}
-                </time>
-              )}
+          {project.publishedAt && (
+            <div className="mt-2 tracking-wider uppercase text-zinc-500 text-[12px] leading-[18px]">
+              <time dateTime={project.publishedAt.toISOString().split("T")[0]}>
+                {format(project.publishedAt, "MMMM d, yyyy")}
+              </time>
             </div>
           )}
-        </Link>
+
+          {/* CTA (arrow animates with group-hover) */}
+          <div className="mt-4 z-20">
+            <ViewCTA as="span" variant="project" />
+          </div>
+        </div>
+
+        {/* Right: image */}
+        <div className="order-2 w-full h-full overflow-hidden">
+          <Image
+            src={project.featuredImage?.url || "/images/fallback.jpeg"}
+            alt={project.title}
+            width={1200}
+            height={800}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            priority
+          />
+        </div>
       </div>
     </section>
   );

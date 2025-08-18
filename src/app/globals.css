@@ -2,123 +2,99 @@
 @tailwind components;
 @tailwind utilities;
 
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-} */
-
-
-
+/* ==========================================================================
+   THEME TOKENS (CSS variables) — light & dark
+   ========================================================================== */
 @layer base {
   :root {
-
     --background: 0 0% 100%;
-
     --foreground: 0 0% 3.9%;
 
     --card: 0 0% 100%;
-
     --card-foreground: 0 0% 3.9%;
 
     --popover: 0 0% 100%;
-
     --popover-foreground: 0 0% 3.9%;
 
     --primary: 0 0% 9%;
-
     --primary-foreground: 0 0% 98%;
 
     --secondary: 0 0% 96.1%;
-
     --secondary-foreground: 0 0% 9%;
 
     --muted: 0 0% 96.1%;
-
     --muted-foreground: 0 0% 45.1%;
 
     --accent: 0 0% 96.1%;
-
     --accent-foreground: 0 0% 9%;
 
     --destructive: 0 84.2% 60.2%;
-
     --destructive-foreground: 0 0% 98%;
 
     --border: 0 0% 89.8%;
-
     --input: 0 0% 89.8%;
-
     --ring: 0 0% 3.9%;
 
     --chart-1: 12 76% 61%;
-
     --chart-2: 173 58% 39%;
-
     --chart-3: 197 37% 24%;
-
     --chart-4: 43 74% 66%;
-
     --chart-5: 27 87% 67%;
 
-    --radius: 0.5rem
+    --radius: 0.5rem;
+
+    /* Light mode → cool gradient (cyan → teal → indigo/blue) */
+    --cta-1: 190 95% 70%; /* cyan */
+    --cta-2: 166 72% 74%; /* teal */
+    --cta-3: 228 92% 78%; /* blue */
+  
   }
 
   .dark {
-
     --background: 0 0% 3.9%;
-
     --foreground: 0 0% 98%;
 
     --card: 0 0% 3.9%;
-
     --card-foreground: 0 0% 98%;
 
     --popover: 0 0% 3.9%;
-
     --popover-foreground: 0 0% 98%;
 
     --primary: 0 0% 98%;
-
     --primary-foreground: 0 0% 9%;
 
     --secondary: 0 0% 14.9%;
-
     --secondary-foreground: 0 0% 98%;
 
     --muted: 0 0% 14.9%;
-
     --muted-foreground: 0 0% 63.9%;
 
     --accent: 0 0% 14.9%;
-
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
-
     --destructive-foreground: 0 0% 98%;
 
     --border: 0 0% 14.9%;
-
     --input: 0 0% 14.9%;
-
     --ring: 0 0% 83.1%;
 
     --chart-1: 220 70% 50%;
-
     --chart-2: 160 60% 45%;
-
     --chart-3: 30 80% 55%;
-
     --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
 
-    --chart-5: 340 75% 55%
+   /* dark: warm vivid orange → red (higher saturation, lower lightness) */
+   --cta-1: 20 95% 58%;  /* bright orange */
+   --cta-2: 10 90% 54%;  /* orange-red   */
+   --cta-3: 0  85% 52%;  /* red          */
   }
 }
 
-
-
+/* ==========================================================================
+   BASE ELEMENT STYLES
+   ========================================================================== */
 @layer base {
   * {
     @apply border-border;
@@ -128,82 +104,73 @@
     @apply bg-background text-foreground font-sans;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  h1, h2, h3, h4, h5, h6 {
     @apply font-heading;
   }
 }
 
-.grid-3d-effect {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 200%;
-  height: 200%;
-  transform: translate(-50%, -50%) perspective(1200px) rotateX(75deg);
-  transform-origin: center;
-  overflow: hidden;
-  z-index: 0;
-}
-
-@keyframes pulse-horizontal {
-
-  0%,
-  100% {
-    opacity: 0.2;
-    filter: drop-shadow(0 0 2px rgba(255, 150, 0, 0.3));
+/* ==========================================================================
+   COMPONENTS — Blog Card
+   ========================================================================== */
+@layer components {
+  .blog-card {
+    @apply grid grid-rows-[auto_1fr_auto] border border-border
+           bg-card text-card-foreground shadow-sm transition-shadow overflow-hidden;
   }
 
-  50% {
-    opacity: 1;
-    filter: drop-shadow(0 0 6px rgba(255, 150, 0, 0.7));
-  }
-}
-
-.animate-horizontal-pulse {
-  animation: pulse-horizontal 2s infinite ease-in-out;
-}
-
-@keyframes vertical-glow {
-
-  0%,
-  100% {
-    opacity: 0.4;
-    filter: drop-shadow(0 0 2px rgba(255, 150, 0, 0.4));
+  /* Hover shadow handled as separate selector */
+  .blog-card:hover {
+    @apply shadow-md;
   }
 
-  50% {
-    opacity: 1;
-    filter: drop-shadow(0 0 6px rgba(255, 150, 0, 0.7));
-  }
-}
-
-.animate-vertical-pulse {
-  animation: vertical-glow 2.5s ease-in-out infinite;
-}
-
-.horizon-glow {
-  box-shadow: 0 0 20px 5px rgba(255, 150, 0, 0.7);
-  opacity: 0.8;
-  animation: horizon-pulse 4s ease-in-out infinite;
-}
-
-@keyframes horizon-pulse {
-  0% {
-    opacity: 0.6;
-    box-shadow: 0 0 10px 3px rgba(255, 150, 0, 0.5);
+  .blog-card__cover {
+    @apply block;
   }
 
-  100% {
-    opacity: 1;
-    box-shadow: 0 0 24px 8px rgba(255, 150, 0, 0.75);
+  .blog-card__media {
+    @apply relative aspect-[4/4] w-full bg-muted;
+  }
+
+  .blog-card__body {
+    @apply p-5 sm:p-6;
+  }
+
+  .blog-card__meta {
+    @apply mb-3 text-xs tracking-wide text-muted-foreground;
+  }
+
+  .blog-card__title {
+    @apply text-xl font-semibold leading-snug;
+  }
+
+  /* Replace group-hover:underline */
+  .group:hover .blog-card__title {
+    @apply underline;
+  }
+
+  .blog-card__excerpt {
+    @apply mt-3 text-sm text-muted-foreground line-clamp-3;
+  }
+
+  .blog-card__footer {
+    @apply flex items-center justify-end px-5 pb-5 sm:px-6 sm:pb-6;
+  }
+
+  .blog-card__cta {
+    @apply text-sm font-medium text-foreground hover:opacity-90;
   }
 }
 
-
-
+/* ==========================================================================
+   UTILITIES
+   ========================================================================== */
+@layer utilities {
+  /* Focus ring helper without @apply variants */
+  .focus-ring {
+    @apply outline-none;
+  }
+  .focus-ring:focus-visible {
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
 

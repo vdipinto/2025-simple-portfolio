@@ -4,13 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/ui/Logo";
-import { Button } from "@/components/ui/button";
-import { ModeToggle } from "./toggle-mode";
+import { ModeToggle } from "@/components/ui/toggle-mode";
 import UserMenu from "@/components/ui/UserMenu";
-import MobileNav from "@/components/ui/mobile-nav"
-
-const navLinkOverride = "rounded-none px-5 py-2";
-
+import MobileNav from "@/components/ui/mobile-nav";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 import {
   NavigationMenu,
@@ -28,127 +26,172 @@ const services = [
   {
     title: "Sanity Website Development",
     href: "/services/sanity-website-development",
-    description: "Building fast and flexible websites with Sanity.io as a headless CMS.",
+    description:
+      "Building fast and flexible websites with Sanity.io as a headless CMS.",
+    points: [
+      "Custom schemas & content models",
+      "Easy-to-use page builder for editors",
+      "Shopify integration for eCommerce",
+      "Scalable CMS setup",
+    ],
   },
   {
     title: "Next.js App Development",
     href: "/services/nextjs-app-development",
-    description: "Developing scalable fullstack applications using Next.js and modern tooling.",
+    description:
+      "Developing scalable fullstack applications using Next.js and modern tooling.",
+    points: [
+      "Fullstack API routes",
+      "SSR & SSG for performance",
+      "Optimized for SEO",
+      "Incremental Static Regeneration (ISR) for fresh content",
+    ],
   },
   {
     title: "WordPress Website Development",
     href: "/services/wordpress-website-development",
-    description: "Creating custom WordPress websites with modern designs and best practices.",
+    description:
+      "Creating custom WordPress websites with modern designs and best practices.",
+    points: [
+      "Custom themes & plugins",
+      "Headless WordPress setups",
+      "Performance optimizations",
+      "Redis & CDN caching for speed",
+    ],
   },
 ];
 
-const Nav = () => {
+const navLinkOverride = "rounded-none px-5 py-2";
+
+export default function Nav() {
   const pathname = usePathname();
 
+  const isActive = (href: string) =>
+    href === "/"
+      ? pathname === "/"
+      : pathname === href || pathname.startsWith(href + "/");
+
   return (
-    <nav className="relative w-full h-full flex items-center justify-between">
+    <nav className="relative w-full h-20 flex items-center justify-between">
       {/* Logo */}
       <Logo />
 
-      {/* Wrapper div for NavigationMenu */}
-      <div className="flex-1 flex justify-center hidden lg:flex">
+      {/* Desktop Nav */}
+      <div className="flex-1 hidden lg:flex justify-center">
         <NavigationMenu>
-          <NavigationMenuList>
+          <NavigationMenuList className="h-20">
+            {/* Services with dropdown */}
+            <NavigationMenuItem>
+              <NavigationMenuTrigger
+                className={cn(
+                  navigationMenuTriggerStyle(),
+                  navLinkOverride,
+                  "h-20 leading-none",
+                  pathname.startsWith("/services") && "text-primary",
+                  "data-[state=open]:text-primary"
+                )}
+              >
+                Services
+              </NavigationMenuTrigger>
 
-            {/* Services with Submenu */}
-            <NavigationMenuItem asChild>
-              <li className="flex h-16">
-                <NavigationMenuTrigger
+              {/* Full-width dropdown */}
+              <NavigationMenuContent className="w-full px-0 py-8">
+                {/* Full-bleed wrapper: spans the entire viewport width */}
+                <div className="w-screen relative left-1/2 -translate-x-1/2">
+                  <ul
+                    className="
+                      grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3
+                      items-stretch auto-rows-fr
+                      gap-y-8 lg:gap-x-12 px-6
+                    "
+                  >
+                    {services.map((s) => (
+                      <NavigationMenuListItem
+                        key={s.title}
+                        title={s.title}
+                        href={s.href}
+                        description={s.description}
+                        points={s.points}
+                        ctaLabel="View Service"
+                      />
+                    ))}
+                  </ul>
+                </div>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+
+            {/* Blog */}
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <Link
+                  href="/blog"
                   className={cn(
                     navigationMenuTriggerStyle(),
                     navLinkOverride,
-                    "h-full flex items-center justify-center",
-                    pathname.startsWith("/services") && "text-primary"
+                    "h-20 leading-none flex items-center",
+                    isActive("/blog") && "text-primary"
                   )}
                 >
-                  Services
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[300px] gap-3 rounded-none">
-                    {services.map((service) => (
-                      <NavigationMenuListItem
-                        key={service.title}
-                        title={service.title}
-                        href={service.href}
-                      >
-                        {service.description}
-                      </NavigationMenuListItem>
-                    ))}
-                  </ul>
-                </NavigationMenuContent>
-              </li>
-            </NavigationMenuItem>
-
-            {/* Blog - No submenu */}
-            <NavigationMenuItem asChild>
-              <li className="flex h-16">
-                <Link href="/blog" legacyBehavior passHref>
-                  <NavigationMenuLink
-                    className={cn(
-                      navigationMenuTriggerStyle(),
-                      navLinkOverride,
-                      "h-full flex items-center justify-center",
-                      pathname === "/blog" && "text-primary"
-                    )}
-                  >
-                    Blog
-                  </NavigationMenuLink>
+                  Blog
                 </Link>
-              </li>
+              </NavigationMenuLink>
             </NavigationMenuItem>
 
-            {/* About - No submenu */}
-            <NavigationMenuItem asChild>
-              <li className="flex h-16">
-                <Link href="/about" legacyBehavior passHref>
-                  <NavigationMenuLink
-                    className={cn(
-                      navigationMenuTriggerStyle(),
-                      navLinkOverride,
-                      "h-full flex items-center justify-center",
-                      pathname === "/about" && "text-primary"
-                    )}
-                  >
-                    About
-                  </NavigationMenuLink>
+            {/* Projects */}
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <Link
+                  href="/projects"
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    navLinkOverride,
+                    "h-20 leading-none flex items-center",
+                    isActive("/projects") && "text-primary"
+                  )}
+                >
+                  Projects
                 </Link>
-              </li>
+              </NavigationMenuLink>
             </NavigationMenuItem>
 
+            {/* About */}
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <Link
+                  href="/about"
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    navLinkOverride,
+                    "h-20 leading-none flex items-center",
+                    isActive("/about") && "text-primary"
+                  )}
+                >
+                  About
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
       </div>
-      <div className="flex h-full items-center hidden lg:flex">
 
-
-        <Link href="/contact" className="h-full border-x border-zinc-200 dark:border-zinc-800">
-          <Button
-            asChild
-            variant="ghost"
-            className="h-full min-w-[220px] bg-transparent rounded-none text-2xl font-bold gap-2 [&_svg]:size-7"
-          >
-            <span className="flex items-center justify-center gap-2">
+      {/* Right controls */}
+      <div className="hidden lg:flex h-full items-center">
+        <div className="h-full border-x border-zinc-200 dark:border-zinc-800 flex items-center px-3">
+          <Button asChild size="lg" className="bg-cta-gradient text-lg sm:text-xl text-black py-6">
+            <Link href="/contact">
               HIRE ME
-            </span>
+              <ArrowRight className="ml-1 size-4" />
+            </Link>
           </Button>
-        </Link>
-
+        </div>
         <ModeToggle />
         <UserMenu />
       </div>
 
       {/* Mobile Nav */}
-      <div className="h-full lg:hidden">
+      <div className="lg:hidden h-full">
         <MobileNav />
       </div>
-
     </nav>
   );
-};
-
-export default Nav;
+}

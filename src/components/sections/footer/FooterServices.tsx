@@ -3,10 +3,9 @@
 import Link from "next/link";
 
 const services = [
-    { name: "Web Development", href: "/services/web-development" },
-    { name: "UI/UX Design", href: "/services/ui-ux-design" },
-    { name: "Content Strategy", href: "/services/content-strategy" },
-    { name: "SEO Optimization", href: "/services/seo" },
+    { name: "Sanity Website Development", href: "/services/sanity-website   -development" },
+    { name: "Next.js App Development", href: "/services/nextjs-app-development" },
+    { name: "WordPress Website Development", href: "/services/wordpress-website-development" },
 ];
 
 export default function FooterServices() {

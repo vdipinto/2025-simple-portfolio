@@ -1,102 +1,65 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Download } from "lucide-react";
-import Link from 'next/link'
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 const HeroSection = () => {
   return (
-    <section className="w-full mx-auto px-4 overflow-hidden relative bg-black text-white">
-      {/* Grid Background */}
-      <div className="absolute inset-0 z-0">
-        <div className="grid-3d-effect w-full h-full">
-          {/* Vertical Lines */}
-          {Array.from({ length: 40 }).map((_, i) => (
-            <div
-              key={`v-${i}`}
-              className="absolute top-0 h-full w-px bg-orange-400 animate-vertical-pulse"
-              style={{
-                left: `${i * 2.5}%`,
-                transform: `translateX(-50%)`,
-                animationDelay: `${i * 0.05}s`,
-              }}
-            />
-          ))}
+    <section className="relative isolate overflow-hidden bg-background text-foreground h-[80vh]">
+      {/* GRID overlay (auto light/dark aware) */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-grid"
+      />
 
-          {/* Horizontal Lines */}
-          {Array.from({ length: 30 }).map((_, i) => (
-            <div
-              key={`h-${i}`}
-              className="absolute left-0 w-full h-px bg-orange-400 animate-horizontal-pulse"
-              style={{
-                bottom: `${i * 3}%`,
-                transform: `translateY(50%)`,
-                animationDelay: `${i * 0.1}s`,
-              }}
-            />
-          ))}
-        </div>
+      {/* Soft bokeh blobs */}
+      <div aria-hidden="true" className="absolute inset-0 blur-3xl">
+        <span className="absolute left-1/3 top-16 h-48 w-48 rounded-full bg-pink-500/25" />
+        <span className="absolute right-1/4 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-sky-500/20" />
+        <span className="absolute bottom-10 left-1/4 h-40 w-40 rounded-full bg-orange-400/20" />
       </div>
 
-      {/* Horizon Glow Line */}
-      <div className="absolute bottom-[67%] left-0 w-full h-px bg-orange-400 z-0 horizon-glow" />
+      {/* Content */}
+      <div className="relative mx-auto max-w-5xl px-6 py-28 sm:py-36 lg:py-44">
+        <div className="text-center">
+          <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
+            <span className="bg-gradient-to-r from-pink-500 via-orange-400 to-sky-400 bg-clip-text text-transparent">
+              Vito Dipinto
+            </span>{" - "}
+            Web Developer
+          </h1>
 
-      {/* Hero Content */}
-      <div className="relative z-0 min-h-[600px] lg:h-[700px] flex flex-col justify-center items-center text-center">
-        <h1 className="text-4xl sm:text-5xl font-bold leading-tight mb-6 -mt-16 drop-shadow-[0_0_10px_rgba(255,150,0,0.8)]">
-          HELLO, MY NAME IS VITO, I make websites <span className="inline-block">🚀</span>
-        </h1>
-        <p className="text-xl text-white mb-4 max-w-2xl drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">
-          Front-end developer who loves crafting beautiful web experiences.
-        </p>
-        <p className="text-xl text-white mb-8 max-w-2xl drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">
-          I&rsquo;m open to new opportunities and enjoy sharing what I learn on my blog.
-        </p>
+          <p className="mx-auto mt-5 max-w-2xl text-balance text-lg leading-relaxed text-muted-foreground">
+            Front-end developer who loves crafting beautiful web experiences
+            — I’m open to new opportunities and enjoy sharing what I learn on my blog.
+          </p>
 
-
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Link href="/contact">
-            {/* Contact Me Button */}
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            {/* View Work (internal route) */}
             <Button
-              className="w-full sm:w-auto px-8 py-5 text-lg font-semibold border border-white 
-     text-white bg-primary 
-     hover:bg-white hover:text-black 
-     dark:bg-black dark:text-white 
-     dark:hover:bg-white dark:hover:text-black 
-     transition-colors"
+              size="lg"
+              asChild
+              className="bg-cta-gradient text-lg sm:text-xl text-black py-6"
             >
-              Contact Me
-              <ArrowRight className="ml-2 h-6 w-6" />
+              <Link href="/projects">
+                View Work <ArrowRight className="ml-2 size-4" />
+              </Link>
             </Button>
-          </Link>
 
-
-          {/* See My CV Button */}
-          <a
-            href="/Vito-Dipinto.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full sm:w-auto"
-          >
-            <Button
-              className="w-full sm:w-auto px-8 py-5 text-lg font-semibold border border-white 
-               text-white bg-primary 
-               hover:bg-white hover:text-black 
-               dark:bg-black dark:text-white 
-               dark:hover:bg-white dark:hover:text-black 
-               transition-colors"
-            >
-              View My CV
-              <Download className="ml-2 h-6 w-6" />
+            {/* See My CV (open PDF in new tab) */}
+            <Button size="lg" asChild className="py-6 text-lg sm:text-xl">
+              <a
+                href="/Vito-Dipinto.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Open CV in a new tab (PDF)"
+              >
+                See My CV <ArrowRight className="ml-2 size-4" />
+              </a>
             </Button>
-          </a>
-
-
-
+          </div>
         </div>
-
-
-
       </div>
     </section>
   );
