@@ -42,7 +42,7 @@ const HeroSection = () => {
               asChild
               className="bg-cta-gradient text-lg sm:text-xl text-black py-6"
             >
-              <Link href="/projects">
+              <Link href="/case-studies">
                 View Work <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>

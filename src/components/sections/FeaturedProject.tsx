@@ -29,7 +29,7 @@ export default async function FeaturedProject() {
       <div className="relative group grid grid-cols-1 md:grid-cols-2 gap-0 border-x border-zinc-200 dark:border-zinc-800">
         {/* Stretched link covers entire card */}
         <StretchedLink
-          href={`/projects/${project.slug}`}
+          href={`/case-studies/${project.slug}`}
           ariaLabel={`${project.title} – view project`}
           className="cursor-pointer z-30"
         />

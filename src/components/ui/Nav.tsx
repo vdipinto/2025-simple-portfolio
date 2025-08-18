@@ -141,15 +141,15 @@ export default function Nav() {
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
                 <Link
-                  href="/projects"
+                  href="/case-studies"
                   className={cn(
                     navigationMenuTriggerStyle(),
                     navLinkOverride,
                     "h-20 leading-none flex items-center",
-                    isActive("/projects") && "text-primary"
+                    isActive("/case-studies") && "text-primary"
                   )}
                 >
-                  Projects
+                  Case Studies
                 </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>

@@ -19,7 +19,7 @@ import OkinawaLogo from "@/components/icons/OkinawaLogo";
 // Top-level links (excluding Services which we render as an accordion)
 const restLinks = [
   { name: "Blog", href: "/blog" },
-  { name: "Projects", href: "/projects" },
+  { name: "Case studies", href: "/case-studies" },
   { name: "About", href: "/about" },
 ];
 

@@ -1,4 +1,3 @@
-// src/components/ui/BlogCard.tsx
 'use client'
 
 import Image from 'next/image'
@@ -7,11 +6,10 @@ import Link from 'next/link'
 export type BlogCardProps = {
   id: string
   title: string
-  slug: string
+  href: string   // ✅ only href, no slug
   readingTime: number | null
-  /** Preformatted on the server — do NOT format here */
-  publishedAtISO: string | null   // e.g. "2025-08-15T10:23:00.000Z"
-  publishedAtUK: string | null    // e.g. "15 August 2025"
+  publishedAtISO: string | null
+  publishedAtUK: string | null
   seoDescription?: string | null
   featuredImage?: {
     url: string
@@ -24,7 +22,7 @@ export type BlogCardProps = {
 export default function BlogCard({
   id,
   title,
-  slug,
+  href,
   readingTime,
   publishedAtISO,
   publishedAtUK,
@@ -38,7 +36,7 @@ export default function BlogCard({
     <article className="group blog-card" data-id={id}>
       {/* Cover */}
       <Link
-        href={`/blog/${slug}`}
+        href={href}
         className="blog-card__cover focus-ring"
         aria-label={`Open blog post: ${title}`}
       >
@@ -50,7 +48,6 @@ export default function BlogCard({
               fill
               className="object-cover"
               sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
-              priority={false}
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
@@ -70,7 +67,7 @@ export default function BlogCard({
           </p>
         )}
 
-        <Link href={`/blog/${slug}`} className="focus-ring">
+        <Link href={href} className="focus-ring">
           <h3 className="blog-card__title">{title}</h3>
         </Link>
 
@@ -79,8 +76,8 @@ export default function BlogCard({
 
       {/* Footer */}
       <div className="blog-card__footer">
-        <Link href={`/blog/${slug}`} className="blog-card__cta focus-ring">
-          Read blog post →
+        <Link href={href} className="blog-card__cta focus-ring">
+          Read case study →
         </Link>
       </div>
     </article>

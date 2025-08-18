@@ -48,7 +48,7 @@ export default function ProjectList({ projects, showEditLinks = false }: Props) 
         >
           <div>
             <Link
-              href={`/case-study/${project.slug}`}
+              href={`/case-studies/${project.slug}`}
               className="text-blue-600 hover:underline"
             >
               {project.title}

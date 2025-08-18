@@ -6,6 +6,7 @@ import Footer from "@/components/sections/footer/Footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SessionWrapper } from "@/components/providers/SessionWrapper";
 import ClientBreadcrumbs from "@/components/navigation/ClientBreadcrumbs";
+import { SITE_URL } from "@/lib/site"; // 👈 add this
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -20,33 +21,32 @@ const publicSans = Public_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL), // 👈 base for canonical/OG URLs
   title: "Vito Dipinto – Full Stack Developer",
   description:
     "Welcome to the portfolio of Vito Dipinto, a full stack developer showcasing personal projects, blog posts, and technical skills.",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
+  alternates: {
+    canonical: "/",
+  },
+  appleWebApp: {
+    title: "Vito Dipinto",
+  },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${spaceGrotesk.variable} ${publicSans.variable} antialiased`}
-      >
+      <body className={`${spaceGrotesk.variable} ${publicSans.variable} antialiased`}>
         <SessionWrapper>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <Header />
             <ClientBreadcrumbs />
-            <main>
-              {children}
-            </main>
+            <main>{children}</main>
             <Footer />
           </ThemeProvider>
         </SessionWrapper>
