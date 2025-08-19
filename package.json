@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate --no-engine && next build",
+    "analyze": "ANALYZE=true next build",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate && prisma migrate deploy"
@@ -69,6 +70,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/bundle-analyzer": "^15.4.7",
     "@prisma/extension-accelerate": "^2.0.2",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^20",

@@ -8,10 +8,10 @@ type ServiceCardItem = {
 };
 
 const serviceCards: ServiceCardItem[] = [
-  { title: "Sanity CMS",  description: "Flexible and powerful content platform for modern websites.", href: "/services/sanity" },
-  { title: "WordPress",   description: "Most popular CMS for building websites.",                     href: "/services/wordpress" },
-  { title: "Next.js",     description: "React framework for production websites and apps.",           href: "/services/nextjs" },
-  { title: "Prisma.io",   description: "Type-safe DB access that’s fast, reliable, and flexible.",    href: "/services/prisma" },
+  { title: "Sanity CMS",  description: "Flexible and powerful content platform for modern websites.", href: "/services/sanity-website-development" },
+  { title: "WordPress",   description: "Most popular CMS for building websites.",                     href: "/services/wordpress-website-development" },
+  { title: "Next.js",     description: "React framework for production websites and apps.",           href: "/services/nextjs-app-development" },
+  { title: "Prisma.io",   description: "Type-safe DB access that’s fast, reliable, and flexible.",    href: "/services/prisma-connect-moderns-applications-to-databases" },
 ];
 
 export default function ServiceCards() {

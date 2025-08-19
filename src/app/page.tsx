@@ -1,19 +1,18 @@
 import HeroSection from "@/components/sections/HeroSection";
 import ServiceCards from "@/components/sections/ServiceCards";
-import TestimonialsSection from "@/components/sections/testimonials/TestimonialsSection";
-import LatestBlogPosts from "@/components/sections/LatestBlogPosts";
+import TestimonialsIsland from "@/components/sections/testimonials/TestimonialsIsland";
 import FeaturedProject from "@/components/sections/FeaturedProject";
+import LatestBlogPosts from "@/components/sections/LatestBlogPosts";
 
 export default function Home() {
   return (
-    <>
-      <main className="">
-        <HeroSection />
-        <ServiceCards />
-        <TestimonialsSection />
-        <FeaturedProject />
-        <LatestBlogPosts />
-      </main>
-    </>
+    <main>
+      <HeroSection />
+      <ServiceCards />
+      {/* slider loads after paint; its CSS is no longer render-blocking */}
+      <TestimonialsIsland />
+      <FeaturedProject />
+      <LatestBlogPosts />
+    </main>
   );
 }
