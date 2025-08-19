@@ -46,16 +46,23 @@ export default function ServiceCard({
         />
       )}
 
-      {/* Large background number */}
+      {/* Large background number as SVG (always sharp) */}
       {numberLabel && (
-        <div
-          className="pointer-events-none select-none absolute left-4 z-0
-                     text-[200px] leading-none font-semibold
-                     text-black/10 dark:text-white/10"
+        <svg
+          viewBox="0 0 500 200"
+          className="absolute left-4 bottom-2 z-0 h-[200px] w-auto fill-black dark:fill-white opacity-5"
           aria-hidden="true"
         >
-          {numberLabel}
-        </div>
+          <text
+            x="0"
+            y="160"
+            fontSize="200"
+            fontWeight="700"
+            letterSpacing="-10"
+          >
+            {numberLabel}
+          </text>
+        </svg>
       )}
 
       {/* Content */}
