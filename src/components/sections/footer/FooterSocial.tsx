@@ -1,12 +1,11 @@
 // src/components/sections/footer/FooterSocial.tsx
 import { FaInstagram, FaLinkedin } from "react-icons/fa";
-import { FaXTwitter }           from "react-icons/fa6";   // 👈 the new “X” icon
-import Link                     from "next/link";
+import { FaXTwitter } from "react-icons/fa6"; // 👈 the new “X” icon
 
 const socialLinks = [
-  { href: "https://twitter.com", label: "X",          icon: FaXTwitter },
+  { href: "https://twitter.com", label: "X", icon: FaXTwitter },
   { href: "https://instagram.com", label: "Instagram", icon: FaInstagram },
-  { href: "https://linkedin.com",  label: "LinkedIn",  icon: FaLinkedin },
+  { href: "https://linkedin.com", label: "LinkedIn", icon: FaLinkedin },
 ];
 
 export default function FooterSocial() {
@@ -19,7 +18,7 @@ export default function FooterSocial() {
       <ul className="space-y-1">
         {socialLinks.map(({ href, label, icon: Icon }) => (
           <li key={label}>
-            <Link
+            <a
               href={href}
               target="_blank"
               rel="noopener noreferrer"
@@ -27,7 +26,7 @@ export default function FooterSocial() {
             >
               <Icon className="w-4 h-4" />
               {label}
-            </Link>
+            </a>
           </li>
         ))}
       </ul>

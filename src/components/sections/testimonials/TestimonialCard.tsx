@@ -11,13 +11,15 @@ export type TestimonialProps = {
 
 export function TestimonialCard({ quote, name, position, image, rating }: TestimonialProps) {
   return (
-    <Card className="">
-      {/* Card Content */}
+    <Card>
       <CardContent className="flex flex-col items-center text-center p-6 gap-4 flex-grow">
         {/* Stars */}
         <div className="flex gap-1">
           {Array.from({ length: 5 }).map((_, index) => (
-            <span key={index} className={index < rating ? "text-yellow-400" : "text-gray-300"}>
+            <span
+              key={index}
+              className={index < rating ? "text-yellow-400" : "text-gray-300"}
+            >
               ★
             </span>
           ))}
@@ -36,6 +38,12 @@ export function TestimonialCard({ quote, name, position, image, rating }: Testim
               alt={name}
               fill
               className="object-cover"
+              // ✅ optimised props for avatars
+              loading="lazy"
+              fetchPriority="low"
+              decoding="async"
+              quality={60}
+              sizes="64px" // only ever rendered at ~64px
             />
           </div>
           <div className="font-medium">{name}</div>

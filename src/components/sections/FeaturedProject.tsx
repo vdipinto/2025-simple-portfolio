@@ -52,7 +52,7 @@ export default async function FeaturedProject() {
             </div>
           )}
 
-          {/* CTA (arrow animates with group-hover) */}
+          {/* CTA */}
           <div className="mt-4 z-20">
             <ViewCTA as="span" variant="project" />
           </div>
@@ -66,7 +66,14 @@ export default async function FeaturedProject() {
             width={1200}
             height={800}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-            priority
+            // ✅ optimised props
+            loading="lazy"
+            fetchPriority="low"
+            decoding="async"
+            quality={60}
+            sizes="(max-width:768px) 100vw,
+                   (max-width:1200px) 50vw,
+                   600px"
           />
         </div>
       </div>

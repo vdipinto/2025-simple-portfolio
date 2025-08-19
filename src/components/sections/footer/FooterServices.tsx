@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 const services = [
-    { name: "Sanity Website Development", href: "/services/sanity-website   -development" },
+    { name: "Sanity Website Development", href: "/services/sanity-website-development" },
     { name: "Next.js App Development", href: "/services/nextjs-app-development" },
     { name: "WordPress Website Development", href: "/services/wordpress-website-development" },
 ];
@@ -19,8 +19,9 @@ export default function FooterServices() {
                     <li key={service.href}>
                         <Link
                             href={service.href}
+                            prefetch={false}   // 👈 stops auto-fetching route bundles
                             className="text-sm text-zinc-600 dark:text-zinc-400 hover:underline hover:text-zinc-900 dark:hover:text-white transition-colors"
-                        >
+                          >
                             {service.name}
                         </Link>
                     </li>
